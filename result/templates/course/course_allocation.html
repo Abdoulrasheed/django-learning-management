@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %} Course Allocation | ARMS {% endblock %}
+
+{% block side_bar %}
+    {% include 'partial_active_element.html' with active='course_allocation' %}
+{% endblock side_bar %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+<div class="card mb-4 wow fadeIn">
+    <div class="card-body d-sm-flex justify-content-between">
+      <h6 class="mb-2 mb-sm-0 pt-1">
+        <a href="/">Home Page</a>
+         <span>/</span>
+         <span>Course Allocation</span>
+        </h6>
+        <span class="badge badge-primary badge-pillt pull-right">
+            <a href="#" class="text-white"><i class="fa fa-file-pdf-o" aria-hidden="true"></i> PDF</a>
+        </span>
+    </div>
+  </div>
+<form method="post">{% csrf_token %}
+<div class="row">
+    <div class="col-lg-3 col-md-3">
+    </div>
+    <div class="col-lg-6 col-md-6">
+      <div class="card">
+        <h3 class="card-header light-blue lighten-1 white-text text-uppercase font-weight-bold text-center py-5">
+            Assign Courses
+          </h3>
+        <div class="card-body">
+          <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              {{ form.lecturer.label }}
+                {{ form.lecturer }}
+                <span class="badge badge-primary badge-pill">
+                {{ form.lecturer|length|add:-1 }} 
+                ({{ form.lecturer|length|add:-1|apnumber }}) 
+                lecturer{{ form.lecturer|length|pluralize }} </span>
+              </li>
+              {% for course in form.courses %}
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ course }}
+                <span class="badge badge-primary badge-pill fa fa-check"></span>
+                {% empty %}
+                <span class="badge badge-primary badge-pill">
+                  No Course Available 
+                  <a href="{% url 'add_new_course' %}"><i style="color: #ffffff">Create Now</i></a>
+                </span>
+              </li>
+                {% endfor %}
+          </ul>
+          <p class="text-small text-muted mb-0 pt-3">
+              Create Staff, Create Course, then allocate course 
+          </p>
+          <span class="badge badge-primary badge-pillt">
+            <a href="#" class="text-white"><i class="fa fa-file-pdf-o" aria-hidden="true"></i> PDF</a>
+          </span>
+          <span class="badge badge-primary badge-pill pull-right">{{ form.courses|length }} 
+            registered course{{ form.courses|length|pluralize }}
+          </span>
+        </div>
+      </div>
+    </div>
+  
+    <div class="col-lg-3 col-md-3">
+    </div>
+
+    </div>
+    <div class="text-center">
+      <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+</form>
+{% endblock content %}

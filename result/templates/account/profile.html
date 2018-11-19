@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} {{ user|upper }}'s' Profile | ARMS {% endblock title %}
+
+{% block side_bar %}
+    {% include 'partial_active_element.html' with active='Profile' %}
+{% endblock side_bar %}
+
+{% block content %}
+<style type="text/css">
+  .table-wrapper-scroll-y {
+display: block;
+max-height: 350px;
+overflow-y: auto;
+-ms-overflow-style: -ms-autohiding-scrollbar;
+}
+</style>
+ <div class="container-fluid mt-5">
+<!-- Heading -->
+<div class="card mb-4 wow fadeIn">
+	<!--Card content-->
+    <div class="card-body d-sm-flex justify-content-between">
+	    <h6 class="mb-2 mb-sm-0 pt-1">
+    	<a href="/">Home Page</a>
+        	<span>/</span>
+            	<span>Profile</span>
+        </h6>
+    </div>
+</div>
+            <!-- Heading -->
+
+  <div class="row">
+    <div class="col-md-3">
+
+    	<!-- Card -->
+<div class="card">
+
+  <!-- Card image -->
+  <div class="view overlay">
+    <img class="card-img-top" src="{{ request.user.get_picture }}" alt="User Image">
+    <a href="#!">
+      <div class="mask rgba-white-slight"></div>
+    </a>
+  </div>
+
+{% if request.user.is_lecturer %}
+    <!-- Card content -->
+  <div class="card-body card-body-cascade text-center">
+
+    <h6 class="card-title">Name: {{ request.user.first_name }}</h6>
+    <h6 class="card-title">Lecturer </h6>
+    <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit Profile</a>
+  </div>
+{% endif %}
+
+{% if request.user.is_student %}
+    <!-- Card content -->
+  <div class="card-body card-body-cascade text-center">
+
+    <h6 class="card-title">Name: {{ request.user.first_name }}</h6>
+    <h6 class="card-title">Role:Student</h6>
+    <h6 class="card-title">Level:{{ level.level }}</h6>
+    <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit Profile</a>
+  </div>
+{% endif %}
+
+
+{% if request.user.is_superuser %}
+    <!-- Card content -->
+  <div class="card-body card-body-cascade text-center">
+
+    <p>Name: {{ request.user.get_full_name }}</p>
+    <p>Role:Super User</p>
+    <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit Profile</a>
+  </div>
+{% endif %}
+
+
+</div>
+<!-- Card -->
+    </div>
+    {% if request.user.is_lecturer %}
+    <div class="col-md-8 text-center">
+      <p>Allocated Courses</p>
+  <div class="table-wrapper-scroll-y">
+
+  <table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Course Code</th>
+      <th scope="col">Course Title</th>
+      <th scope="col">Course Unit</th>
+      <th scope="col">Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for course in courses %}
+    <tr>
+      <th scope="row">{{ forloop.counter }}</th>
+      <td>{{ course.courseCode }}</td>
+      <td>{{ course }}</td>
+      <td>{{ course.courseUnit }}</td>
+      <td>
+	  	  <span class="table-remove"><a href="{% url 'add_score_for' course.id %}" class="btn btn-info btn-rounded btn-sm my-0">Mark</a></span>
+	    </td>
+    </tr>
+    {% empty %}
+    <tr>
+    <td>{{ course.courseCode }}</td>
+      <td></td>
+      <td>No course is assigned to you !</td>
+      <td></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+    </div>
+    {% endif %}
+        {% if request.user.is_student %}
+    <div class="col-md-8 text-center">
+      <p>Registered Courses</p>
+  <table class="table table-bordered">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Course Code</th>
+      <th scope="col">Course Title</th>
+      <th scope="col">Course Unit</th>
+      <th scope="col">Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for course in courses %}
+    <tr>
+      <th scope="row">{{ forloop.counter }}</th>
+      <td>{{ course.course.courseCode }}</td>
+      <td>{{ course.course.courseTitle }}</td>
+      <td>{{ course.course.courseUnit }}</td>
+       <td>
+          <a href="" title="view score" class="blue-text"><i class="fa fa-eye"></i></a>
+          <a title="drop" class="red-text"><i class="fa fa-times"></i></a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+    <td>{{ course.courseCode }}</td>
+      <td></td>
+      <td>You haven't register any {{ level.level }} level course !</td>
+      <td></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

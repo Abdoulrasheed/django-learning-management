@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %} Manage Session | ARMS {% endblock title %}
+
+{% block side_bar %}
+    {% include 'partial_active_element.html' with active='manage_session' %}
+{% endblock side_bar %}
+
+{% block content %}
+	<div class="container-fluid mt-5">
+
+            <!-- Heading -->
+            <div class="card mb-4 wow fadeIn">
+
+                <!--Card content-->
+                <div class="card-body d-sm-flex justify-content-between">
+
+                    <h6 class="mb-2 mb-sm-0 pt-1">
+                        <a href="/">Home Page</a>
+                        <span>/</span>
+                        <span>Session</span>
+                    </h6>
+                </div>
+
+            </div>
+            <!-- Heading -->
+            <!-- Heading -->
+            <h6 class="mb-2 mb-sm-0 pt-1">
+            <a href="{% url 'create_new_session' %}" class="btn btn-default btn-rounded mb-4">
+               Add Session
+            </a>
+            </h6>
+                <!--Card content-->
+                <table class="table table-striped">
+                     <thead>
+                        <tr>
+                          <th scope="col">#</th>
+                          <th scope="col">Session</th>
+                          <th scope="col">Current Session</th>
+                          <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                {% for session in sessions %}
+                    <tbody>
+                        <tr>
+                          <th scope="row">{{ forloop.counter }}</th>
+                          <td>{{ session.session }}</td>
+                          <td>{% if session.is_current_session %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times">{% endif %}</td>
+                          <td>
+                            <a title="view" class="blue-text"><i class="fa fa-user"></i></a>
+                            <a href="{% url 'edit_session' pk=session.pk %}" title="edit" class="teal-text"><i class="fa fa-pencil"></i></a>
+                            <a href="{% url 'delete_session' pk=session.pk %}" title="delete" class="red-text"><i class="fa fa-times"></i></a>
+                          </td>
+                        </tr>
+                    </tbody>
+                {% endfor %}
+                 </table>
+            </div>
+        </div>
+</div>
+{% endblock %}

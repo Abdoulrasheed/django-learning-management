@@ -1,0 +1,1 @@
+# django-school-management

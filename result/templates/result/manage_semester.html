@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %} Manage Semester | ARMS {% endblock title %}
+
+{% block side_bar %}
+    {% include 'partial_active_element.html' with active='manage_semester' %}
+{% endblock side_bar %}
+
+{% block content %}
+	<div class="container-fluid mt-5">
+
+            <!-- Heading -->
+            <div class="card mb-4 wow fadeIn">
+
+                <!--Card content-->
+                <div class="card-body d-sm-flex justify-content-between">
+
+                    <h6 class="mb-2 mb-sm-0 pt-1">
+                        <a href="/">Home Page</a>
+                        <span>/</span>
+                        <span>Semester</span>
+                    </h6>
+                </div>
+
+            </div>
+            <!-- Heading -->
+            <!-- Heading -->
+            <h6 class="mb-2 mb-sm-0 pt-1">
+            <a href="{% url 'create_new_semester' %}" class="btn btn-default btn-rounded mb-4">
+               Add Semester
+            </a>
+            </h6>
+                <!--Card content-->
+                <table class="table table-striped">
+                     <thead>
+                        <tr>
+                          <th scope="col">#</th>
+                          <th scope="col">Semester</th>
+                          <th scope="col">Session</th>
+                          <th scope="col">Is Current</th>
+                          <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                {% for semester in semesters %}
+                    <tbody>
+                        <tr>
+                          <th scope="row">{{ forloop.counter }}</th>
+                          <td>{{ semester.semester }}</td>
+                          <td>{{ semester.session }}</td>
+                          <td>{% if semester.is_current_semester %}<i class="fa fa-check"></i>{% else %}<i class="fa fa-times">{% endif %}</td>
+                          <td>
+                            <a title="view" class="blue-text"><i class="fa fa-user"></i></a>
+                            <a href="{% url 'edit_semester' pk=semester.pk %}" title="edit" class="teal-text"><i class="fa fa-pencil"></i></a>
+                            <a href="{% url 'delete_semester' pk=semester.pk %}" title="delete" class="red-text"><i class="fa fa-times"></i></a>
+                          </td>
+                        </tr>
+                    </tbody>
+                    {% empty %}
+                    <tbody>
+                        <tr>
+                          <th></th>
+                          <td>No Semester Available <i class="blue-text"><a href="{% url 'create_new_semester' %}">Create One</a></i></td>
+                          <td></td>
+                          <td></td>
+                        </tr>
+                    </tbody>
+                {% endfor %}
+                 </table>
+            </div>
+        </div>
+</div>
+{% endblock %}

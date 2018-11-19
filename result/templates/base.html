@@ -1,0 +1,124 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>{% block title %} Automated Result Processing | Home {% endblock title%}</title>
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <!-- Bootstrap core CSS -->
+        <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+        <!-- Material Design Bootstrap -->
+        <link href="{% static 'css/mdb.min.css' %}" rel="stylesheet">
+        <!-- Your custom styles (optional) -->
+        <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    </head>
+
+
+    <body class="grey lighten-3">
+
+    <!--Main Navigation-->
+    <header>
+
+        <!-- Navbar -->
+        <nav class="navbar fixed-top navbar-expand-lg navbar-light white scrolling-navbar">
+            <div class="container-fluid">
+
+                <!-- Brand -->
+                <a class="navbar-brand waves-effect" href="/">
+                    <strong class="blue-text">Automated Result Management System</strong>
+                </a>
+
+                <!-- Collapse -->
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Links -->
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+                    <ul class="navbar-nav mr-auto"></ul>
+                    <ul class="navbar-nav nav-flex-icons">
+                        <li class="nav-item">
+                            {% if request.user.is_superuser %}
+                            <a href="{% url 'manage_session' %}" class="nav-link border border-light rounded waves-effect">
+                                <i class="fa mr-3"></i>{{ current_session }}
+                            </a>
+                            {% else %}
+                            <a href="#" class="nav-link border border-light rounded waves-effect">
+                                <i class="fa mr-3"></i>{{ current_session }}
+                            </a>
+                            {% endif %}
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link border border-light rounded waves-effect">
+                                {% if user.is_authenticated %}
+                                <i class="fa fa-user mr-3"></i>{{ user|upper }}
+                                {% else %}
+                                <a class="fa fa-user mr-3" href="/accounts/login">login</a>
+                                {% endif %}
+                            </a>
+                        </li>
+
+                         <li class="nav-item">
+                            <a href="/accounts/logout/" class="nav-link border border-light rounded waves-effect">
+                                <i class="fa fa-unlock mr-3"></i>Logout
+                            </a>
+                        </li>
+                    </ul>
+
+                </div>
+
+            </div>
+        </nav>
+        <!-- Navbar -->
+
+        <!-- Sidebar -->
+        <div class="sidebar-fixed position-fixed">
+
+            
+                <p style="margin-left: 30px;" id="icon" class="logo"> ARMS </p> 
+                {% if request.user.is_lecturer %}
+                <p><i class="fa fa-hand-o-right" aria-hidden="true"></i>
+                    <span class="teal-text text-center"> Course Lecturer</span></p>
+                {% elif request.user.is_student %}
+                <p><i class="fa fa-hand-o-right" aria-hidden="true"></i>
+                    <span class="teal-text text-center"> Student</span></p>
+                {% else %}
+                <p><i class="fa fa-hand-o-right" aria-hidden="true"></i>
+                    <span class="teal-text text-center"> Superuser</span></p>
+                {% endif %}
+            
+            {% block side_bar %}
+                {% include 'partial_active_element.html' with active='Dashboard' %}
+            {% endblock side_bar %}
+
+        </div>
+        <!-- Sidebar -->
+
+    </header>
+    <!--Main Navigation-->
+
+    <!--Main layout-->
+    <main class="pt-5 mx-lg-5">
+        {% block content%} {% endblock %}
+    </main>
+    <!--Main layout-->
+
+    <!-- SCRIPTS -->
+    <!-- JQuery -->
+    <script type="text/javascript" src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript" src="{% static 'js/popper.min.js' %}"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript" src="{% static 'js/mdb.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/tooltips.js' %}"></script>
+
+    </body>
+</html>

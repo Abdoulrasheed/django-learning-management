@@ -1,0 +1,32 @@
+.sidebar-fixed {
+  height: 100vh;
+  width: 270px;
+  -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  z-index: 1050;
+  background-color: #fff;
+  padding: 1.5rem;
+  padding-top: 0; }
+  .sidebar-fixed .list-group .active {
+    -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+    -webkit-border-radius: 5px;
+    border-radius: 5px; }
+  .sidebar-fixed .logo-wrapper {
+    padding: 2.5rem; }
+    .sidebar-fixed .logo-wrapper img {
+      max-height: 50px; }
+
+@media (min-width: 1200px) {
+  .navbar,
+  .page-footer,
+  main {
+    padding-left: 270px; } }
+
+@media (max-width: 1199.98px) {
+  .sidebar-fixed {
+    display: none; } }
+
+.logo {
+text-shadow: rgb(179, 179, 179) 0px 0px 0px, rgb(180, 180, 180) 1px 1px 0px, rgb(182, 182, 182) 2px 2px 0px, rgb(184, 184, 184) 3px 3px 0px, rgb(185, 185, 185) 4px 4px 0px, rgb(187, 187, 187) 5px 5px 0px, rgb(189, 189, 189) 6px 6px 0px, rgb(190, 190, 190) 7px 7px 0px, rgb(192, 192, 192) 8px 8px 0px, rgb(194, 194, 194) 9px 9px 0px, rgb(195, 195, 195) 10px 10px 0px, rgb(197, 197, 197) 11px 11px 0px, rgb(199, 199, 199) 12px 12px 0px, rgb(201, 201, 201) 13px 13px 0px, rgb(202, 202, 202) 14px 14px 0px, rgb(204, 204, 204) 15px 15px 0px, rgb(206, 206, 206) 16px 16px 0px, rgb(207, 207, 207) 17px 17px 0px, rgb(209, 209, 209) 18px 18px 0px, rgb(211, 211, 211) 19px 19px 0px, rgb(212, 212, 212) 20px 20px 0px, rgb(214, 214, 214) 21px 21px 0px, rgb(216, 216, 216) 22px 22px 0px, rgb(218, 218, 218) 23px 23px 0px, rgb(219, 219, 219) 24px 24px 0px, rgb(221, 221, 221) 25px 25px 0px, rgb(223, 223, 223) 26px 26px 0px, rgb(224, 224, 224) 27px 27px 0px, rgb(226, 226, 226) 28px 28px 0px, rgb(228, 228, 228) 29px 29px 0px, rgb(230, 230, 230) 30px 30px 0px, rgb(231, 231, 231) 31px 31px 0px, rgb(233, 233, 233) 32px 32px 0px, rgb(235, 235, 235) 33px 33px 0px, rgb(236, 236, 236) 34px 34px 0px, rgb(238, 238, 238) 35px 35px 0px, rgb(240, 240, 240) 36px 36px 0px, rgb(241, 241, 241) 37px 37px 0px, rgb(243, 243, 243) 38px 38px 0px, rgb(245, 245, 245) 39px 39px 0px, rgb(247, 247, 247) 40px 40px 0px, rgb(248, 248, 248) 41px 41px 0px, rgb(250, 250, 250) 42px 42px 0px, rgb(252, 252, 252) 43px 43px 0px, rgb(253, 253, 253) 44px 44px 0px; font-size: 40px; color: rgb(95, 89, 255); height: 120px; width: 136px; line-height: 136px; border-radius: ; text-align: center; background-color: rgb(255, 255, 255);
+}

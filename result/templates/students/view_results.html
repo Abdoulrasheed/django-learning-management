@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %} Results | ARMS {% endblock title %}
+
+{% block side_bar %}
+    {% include 'partial_active_element.html' with active='view_results' %}
+{% endblock side_bar %}
+
+{% block content %}
+	<div class="container-fluid mt-5">
+<style type="text/css">
+  .table-wrapper-scroll-y {
+display: block;
+max-height: 350px;
+overflow-y: auto;
+-ms-overflow-style: -ms-autohiding-scrollbar;
+}
+</style>
+<div class="table-wrapper-scroll-y">
+
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Course Title</th>
+        <th scope="col">Course Code</th>
+        <th scope="col">GRADE</th>
+      </tr>
+    </thead>
+    {% for course in courses %}
+    <tbody>
+      <tr>
+        <th scope="row">{{ forloop.counter }}</th>
+        <td>{{ course.course.courseTitle }}</td>
+        <td>{{ course.course.courseCode }}</td>
+        <td>{{ course.grade }}</td>
+      </tr>
+    </tbody>
+    {% endfor %}
+  </table>
+</div>
+<br>
+<tbody>
+  <tr>
+    <th scope="row"></th>
+    <th></th>
+    {% if result.level == student.level %}
+    <th><label>Current GPA:</label> {{ result.gpa }}</th>
+    {% endif %}
+    
+    {% if student.level|add:'-100' == result.level %}
+    <th><label>Previous GPA:</label> {{ result.gpa }}</th>
+    {% endif %}
+  </tr>
+  <br>
+  <tr>
+    <th scope="row"></th>
+    <th></th>
+    <th><label>CGPA:</label> {{ result.gpa }}</th>
+  </tr>
+</tbody>
+</div>
+<br>
+{% endblock %}

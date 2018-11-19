@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %} Staff lists | ARMS {% endblock title %}
+
+{% block side_bar %}
+    {% include 'partial_active_element.html' with active='staff' %}
+{% endblock %}
+{% block content %}
+<style type="text/css">
+  .table-wrapper-scroll-y {
+display: block;
+max-height: 350px;
+overflow-y: auto;
+-ms-overflow-style: -ms-autohiding-scrollbar;
+}
+</style>
+	<div class="container-fluid mt-5">
+
+            <!-- Heading -->
+            <div class="card mb-4 wow fadeIn">
+
+                <!--Card content-->
+                <div class="card-body d-sm-flex justify-content-between">
+
+                    <h6 class="mb-2 mb-sm-0 pt-1">
+                        <a href="/">Home Page</a>
+                        <span>/</span>
+                        <span>{{ user_type }}</span>
+                    </h6>
+                </div>
+
+            </div>
+            {% if request.user.is_superuser %}
+            <!-- Heading -->
+            <h6 class="mb-2 mb-sm-0 pt-1">
+            <a href="{% url 'add_new_staff' %}" class="btn btn-default btn-rounded mb-4">
+               Add New {{ user_type }}
+            </a>
+            <a class="pull-right btn btn-default btn-rounded mb-3" href="" class="btn btn-default btn-rounded mb-4">
+               <i class="fa fa-file-pdf-o" aria-hidden="true"></i> PDF
+            </a>
+            </h6>
+            {% endif %}
+
+                <!--Card content-->
+  <div class="table-wrapper-scroll-y">
+
+  <table class="table table-bordered table-striped">
+                     <thead>
+                        <tr>
+                          <th scope="col">#</th>
+                          <th scope="col">Username</th>
+                          <th scope="col">Firstname</th>
+                          <th scope="col">Lastname</th>
+                          <th scope="col">Mobile</th>
+                          <th scope="col">Address</th>
+                          <th scope="col">Role</th>
+                          <th scope="col">Picture</th>
+                          {% if request.user.is_superuser %}
+                          <th scope="col">Action</th>
+                          {% endif %}
+                        </tr>
+                    </thead>
+                {% for staff in staff %}
+                    <tbody>
+                        <tr>
+                          <th scope="row">{{ forloop.counter }}</th>
+                          <td>{% if staff.username %} {{ staff.username }} {% else %} N/A  {% endif %}</td>
+                          <td>{% if staff.first_name %} {{ staff.first_name }} {% else %} N/A  {% endif %}</td>
+                          <td>{% if staff.last_name %} {{ staff.last_name }} {% else %} N/A {% endif %}</td>
+                          <td>{% if staff.phone %} {{ staff.phone }} {% else %}
+                          <span class="red-text">N/A</span>{% endif %}</td>
+                          <td>{% if staff.address %} {{ staff.address }} {% else %} N/A {% endif %}</td>
+                          <td>{% if staff.is_superuser %} Superuser {% else %} Lecturer {% endif %}</td>
+                          <td><img width="30" src="{{ staff.get_picture }}" alt="{{ staff.username }}'s image"></td>
+                          {% if request.user.is_superuser %}
+                          <td>
+                            <a data-toggle="tooltip" title="view" class="blue-text"><i class="fa fa-user"></i></a>
+                            <a data-toggle="tooltip" href="{% url 'edit_staff' pk=staff.pk %}" title="edit" class="teal-text"><i class="fa fa-pencil"></i></a>
+                            <a data-toggle="tooltip" href="{% url 'delete_staff' pk=staff.pk %}" title="delete" class="red-text"><i class="fa fa-times"></i></a>
+                          </td>
+                          {% endif %}
+                        </tr>
+                    </tbody>
+                    {% empty %}
+                      <tbody>
+                        <tr>
+                          <th></th>
+                          <td></td>
+                          <td></td>
+                          <td><i>No staff Added</i></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                        </tr>
+                    </tbody>
+                {% endfor %}
+                 </table>
+            </div>
+        </div>
+        <br>
+{% endblock %}

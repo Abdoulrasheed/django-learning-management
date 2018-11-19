@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Score Entry | ARMS {% endblock title %}
+
+{% block side_bar %}
+    {% include 'partial_active_element.html' with active='Add_Score' %}
+{% endblock side_bar %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+
+ <!-- Heading -->
+    <div class="card mb-4 wow fadeIn">
+	<!--Card content-->
+        <div class="card-body d-sm-flex justify-content-between">
+
+            <h6 class="mb-2 mb-sm-0 pt-1">
+                <a href="/">Home Page</a>
+                     <span>/</span>
+                     <span>Add Score</span>
+            </h6>
+        </div>
+
+    </div>
+	<!-- Heading -->
+
+	<!-- Editable table -->
+	<form method="post" action="">{% csrf_token %}
+	<div class="card">
+	<h6 class="card-header text-center font-weight-bold text-uppercase py-4">{{ current_semester }} Semester - {{ current_session }}</h6>
+		<div class="container">
+		  <div class="row">
+		    <div class="col-md-5">
+		    	<button data-toggle="tooltip" title="Save Score" type="submit" class="btn btn-primary w-25 p-3 float-left">Save</button>
+		    	<span data-toggle="tooltip" title="Allow editing" id="edit_btn" onclick="toggle_score_edit()" class="btn btn-default w-26 p-3 float-left">Edit</span>
+		    	<span data-toggle="tooltip" title="Print Result sheet" class="btn btn-default w-26 p-3 float-left">
+		    		<a class="white-text" href="{% url 'result_sheet_pdf_view' id=course.id %}">PDF</a>
+		    	</span>
+		    </div>
+		    <div class="col-md-3"><small>{{ course.courseTitle }}</small></div>
+		    <div class="col-md-4">
+		    	<div class="dropdown">
+	    			<button class="btn btn-info dropdown-toggle float-right" type="button" id="dropdownMenu3" 		data-toggle="dropdown"
+		    			aria-haspopup="true" aria-expanded="false">
+		    			{{ course.courseCode }}
+		    		</button>
+
+					<div class="dropdown-menu" aria-labelledby="dropdownMenu3">
+	    				<h6 class="dropdown-header">Select Course</h6>
+	    					{% for course in courses %}
+	    				<a data-toggle="tooltip" title="{{ course.courseTitle }}" class="dropdown-item" href="{% url 'add_score_for' course.id %}">
+	    					{{ course.courseCode }}
+	    				</a>
+	    					{% endfor %}
+					</div>
+
+				</div>
+			</div>
+		  </div>
+		</div>
+	
+
+
+	  <div class="card-body">
+	    <div id="table" class="table-editable">
+
+	      <table class="table table-bordered table-responsive-md table-striped text-center">
+	        <tr>
+	          <th class="text-center">Student</th>
+	          <th class="text-center">CA Score</th>
+	          <th class="text-center">Exam Score</th>
+	          <th class="text-center">Total</th>
+	          <th class="text-center">Grade</th>
+	          <th class="text-center">Comment</th>
+	        </tr>
+	        {% for student in students %}
+	        <tr>
+	          <td class="pt-3-half" name="{{ student.id }}" contenteditable="false">
+	          		{{ student.student.id_number }}
+	          </td>
+	          <td class="pt-3-half" contenteditable="false">
+	          	<input class="score" type="number" name="{{ student.id }}" value="{{ student.ca }}">
+	          </td>
+	          <td class="pt-3-half" contenteditable="false">
+	          	<input class="score" type="number" name="{{ student.id }}" value="{{ student.exam }}">
+	          </td>
+	          <td class="pt-3-half" contenteditable="false">{{ student.total }}</td>
+	          <td class="pt-3-half" contenteditable="false">{{ student.grade }}</td>
+	          <td class="pt-3-half" contenteditable="false">{{ student.comment }}</td>
+	        </tr>
+	        {% endfor %}
+	      </table>
+	    </div>
+	  </div>
+	</div>
+</form>
+	<!-- Editable table -->
+	<br>
+	<br>
+
+</div>
+<script src="{% static 'js/disable_input_score.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %} Score Entry | ARMS {% endblock title %}
+
+{% block side_bar %}
+    {% include 'partial_active_element.html' with active='Add_Score' %}
+{% endblock side_bar %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+
+ <!-- Heading -->
+    <div class="card mb-4 wow fadeIn">
+	<!--Card content-->
+        <div class="card-body d-sm-flex justify-content-between">
+
+            <h6 class="mb-2 mb-sm-0 pt-1">
+                <a href="/">Home Page</a>
+                     <span>/</span>
+                     <span>Add Score</span>
+            </h6>
+        </div>
+
+    </div>
+	<!-- Heading -->
+
+	<!-- Editable table -->
+	<div class="card">
+	<h6 class="card-header text-center font-weight-bold text-uppercase py-4">{{ current_semester }} Semester - {{ current_session }}</h6>
+		<div class="container">
+		  <div class="row">
+		    <div class="col-md-5"><button type="button" class="btn btn-default w-25 p-3 disabled float-left">Save</button></div>
+		    <div class="col-md-3"><i data-toggle="tooltip" title="click on the dropdown button to select a course">No course selected</i></div>
+		    <div class="col-md-4">
+		    	<div class="dropdown">
+	    			<button class="btn btn-primary dropdown-toggle float-right" type="button" id="dropdownMenu3" 		data-toggle="dropdown"
+		    			aria-haspopup="true" aria-expanded="false">
+		    			Select Course
+		    		</button>
+
+					<div class="dropdown-menu" aria-labelledby="dropdownMenu3">
+	    				<h6 class="dropdown-header">Select Course</h6>
+	    				{% for course in courses %}
+	    				<a data-toggle="tooltip" title="{{ course.courseTitle }}" class="dropdown-item" href="{% url 'add_score_for' course.id %}">{{ course.courseCode }}</a>
+	    				{% empty %}
+		    				<h6 data-toggle="tooltip" class="text-center" title="maybe you have'nt been allocated any course yet">
+			    					No course
+		    				</h6>
+	    				{% endfor %}
+					</div>
+
+				</div>
+			</div>
+		  </div>
+		</div>
+{% endblock %}

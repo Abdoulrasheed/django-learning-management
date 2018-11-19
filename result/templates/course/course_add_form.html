@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block side_bar %}
+    {% include 'partial_active_element.html' with active='course_list' %}
+{% endblock side_bar %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+<div class="card">
+
+    <h5 class="card-header info-color white-text text-center py-4">
+        <strong>Create Course</strong>
+    </h5>
+
+    <div class="card-body px-lg-5 pt-0">
+
+        <form method="post" class="md-form" style="color: #757575;">{% csrf_token %}
+             <div class="form-row">
+                <div class="col">
+                    <!-- First name -->
+                    <div class="md-form">
+                        {{ form.courseCode }}
+                        <label for="materialRegisterFormFirstName">{{ form.courseCode.label }}</label>
+                    </div>
+                </div>
+                <div class="col">
+                    <!-- Last name -->
+                    <div class="md-form">
+                        {{ form.courseTitle }}
+                        <label for="materialRegisterFormLastName">{{ form.courseTitle.label }}</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col">
+                    <!-- First name -->
+                    <div class="md-form">
+                        {{ form.courseUnit }}
+                        <label for="materialRegisterFormFirstName">{{ form.courseUnit.label }}</label>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="md-form">
+                        {{ form.description }}
+                        <label for="materialRegisterFormLastName">{{ form.description.label }}</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col">
+
+                    <div>
+                        <label for="materialRegisterFormFirstName"> {{ form.level.label }}</label><br>
+                    </div>
+                    <div class="md-form">
+                        {{ form.level }}
+                    </div>
+                </div>
+                <div class="col">
+                    <div>
+                        <label for="materialRegisterFormFirstName"> {{ form.semester.label }}</label><br>
+                    </div>
+                    <div class="md-form">
+                        {{ form.semester }}
+                    </div>
+                </div>
+            </div>
+           	<button class="btn btn-outline-info btn-rounded btn-block my-4 waves-effect z-depth-0" type="submit">
+            	Save
+            </button>
+        </form>
+    </div>
+</div>
+</div>
+{% endblock %}
