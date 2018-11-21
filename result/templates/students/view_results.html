@@ -8,6 +8,14 @@
 
 {% block content %}
 	<div class="container-fluid mt-5">
+          {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-success alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
 <style type="text/css">
   .table-wrapper-scroll-y {
 display: block;
@@ -16,8 +24,8 @@ overflow-y: auto;
 -ms-overflow-style: -ms-autohiding-scrollbar;
 }
 </style>
+<center>{{ student.level }}L Result</center>
 <div class="table-wrapper-scroll-y">
-
   <table class="table table-bordered table-striped">
     <thead>
       <tr>
@@ -27,7 +35,9 @@ overflow-y: auto;
         <th scope="col">GRADE</th>
       </tr>
     </thead>
+    <u>First Semester:</u>
     {% for course in courses %}
+    {% if course.course.semester == "First" %}
     <tbody>
       <tr>
         <th scope="row">{{ forloop.counter }}</th>
@@ -36,6 +46,31 @@ overflow-y: auto;
         <td>{{ course.grade }}</td>
       </tr>
     </tbody>
+    {% endif %}
+    {% endfor %}
+    <br>
+  </table>
+    <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Course Title</th>
+        <th scope="col">Course Code</th>
+        <th scope="col">GRADE</th>
+      </tr>
+    </thead>
+    <u>Seccond Semester:</u>
+    {% for course in courses %}
+    {% if course.course.semester == "Second" %}
+    <tbody>
+      <tr>
+        <th scope="row">{{ forloop.counter }}</th>
+        <td>{{ course.course.courseTitle }}</td>
+        <td>{{ course.course.courseCode }}</td>
+        <td>{{ course.grade }}</td>
+      </tr>
+    </tbody>
+    {% endif %}
     {% endfor %}
   </table>
 </div>
@@ -44,19 +79,31 @@ overflow-y: auto;
   <tr>
     <th scope="row"></th>
     <th></th>
+    {% for result in result %}
     {% if result.level == student.level %}
     <th><label>Current GPA:</label> {{ result.gpa }}</th>
-    {% endif %}
-    
-    {% if student.level|add:'-100' == result.level %}
-    <th><label>Previous GPA:</label> {{ result.gpa }}</th>
-    {% endif %}
   </tr>
   <br>
   <tr>
     <th scope="row"></th>
     <th></th>
-    <th><label>CGPA:</label> {{ result.gpa }}</th>
+    <th><label>Current CGPA:</label> {{ result.gpa }}</th>
+  </tr>
+  {% endif %}
+  {% empty %}
+  <th><label>Current GPA:</label> 0.0</th>
+  <br>
+  <tr>
+    <th scope="row"></th>
+    <th></th>
+    <th><label>Current CGPA:</label> 0.0</th>
+  </tr>
+  {% endfor %}
+  <br>
+  <tr>
+    <th scope="row"></th>
+    <th></th>
+    <th><label>Previous CGPA:</label> {{ previousCGPA }}</th>
   </tr>
 </tbody>
 </div>

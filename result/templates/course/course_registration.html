@@ -8,17 +8,32 @@
     {% include 'partial_active_element.html' with active='course_registration' %}
 {% endblock side_bar %}
 {% block content %}
-<link rel="stylesheet" type="text/css" href="{% static 'js/tbl_scroll.js' %}">
+    {% block js %}
+    <script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+       <script type="text/javascript" src="{% static 'js/tbl_scroll.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/disable_checkbox.js' %}"></script>
+    {% endblock js %}
 <div class="container-fluid mt-5">
 	<!-- Table with panel -->
 <form method="POST" action="{% url 'course_registration' %}">{% csrf_token %}
+  {% for message in messages %}
+  <div style="background-color: lightblue" class="alert {{ message.tags }} alert-dismissible" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    {{ message }}
+  </div>
+{% endfor %}
 <div class="card card-cascade narrower">
 
   <!--Card image-->
   <div class="view view-cascade gradient-card-header blue-gradient narrower py-2 mx-4 mb-3 d-flex justify-content-between align-items-center">
 
     <div>
-      <button type="submit" class="btn btn-outline-white btn-rounded btn-sm px-2">
+      <button id="add_selected" type="submit" class="btn btn-outline-white btn-rounded btn-sm px-2">
         <i class="fa fa-plus" aria-hidden="true"></i> Add Selected
       </button>
     </div>
@@ -26,14 +41,10 @@
     <a href="" class="white-text mx-3">{{ current_session }} Course Registration</a>
     <span class="pull-right white-text">Level: {{ student.level }}</span>
     <div>
-      <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2">
-        <i class="fa fa-file-pdf-o" aria-hidden="true"></i> PDF
-      </button>
     </div>
 
   </div>
   <!--/Card image-->
-
   <div class="px-4">
 
     <div class="table-wrapper">
@@ -77,7 +88,7 @@
           {% if course.semester == "First" %}
         <tr>
             <th scope="row">
-              <input name="{{ course.pk }}" class="form-check-input" type="checkbox" id="checkbox1">
+              <input name="{{ course.pk }}" value="{{ course.courseUnit }}" class="form-check-input" type="checkbox" id="checkbox1">
               <label class="form-check-label" for="checkbox1" class="label-table"></label>
             </th>
             <td>{{ course.courseCode }}</td>
@@ -96,7 +107,7 @@
             <th scope="row">
              
             </th>
-            <td></td>
+            <td>Selected Unit(s): <a id="units"></a></td>
             <td></td>
             <td></td>
             <td></td>
@@ -153,7 +164,7 @@
           {% if course.semester == "Second" %}
         <tr>
             <th scope="row">
-              <input name="{{ course.pk }}" class="form-check-input" type="checkbox" id="checkbox1">
+              <input name="{{ course.pk }}" value="{{ course.courseUnit }}" class="form-check-input" type="checkbox" id="checkbox1">
               <label class="form-check-label" for="checkbox1" class="label-table"></label>
             </th>
             <td>{{ course.courseCode }}</td>
@@ -205,7 +216,7 @@
 
     <div>
       <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2">
-        <i class="fa fa-file-pdf-o" aria-hidden="true"></i> PDF
+        <i class="fa fa-file-pdf-o" aria-hidden="true"></i> Print Registration Form
       </button>
     </div>
 
@@ -253,7 +264,7 @@
         	{% for course in registered_courses %}
         <tr>
             <th scope="row">
-              <input name="{{ course.pk }}" class="form-check-input" type="checkbox" id="checkbox1">
+              <input name="{{ course.pk }}" value="{{ course.courseUnit }}" class="form-check-input" type="checkbox" id="checkbox1">
               <label class="form-check-label" for="checkbox1" class="label-table"></label>
             </th>
             <td>{{ course.courseCode }}</td>
@@ -292,4 +303,6 @@
 <br>
 <br>
 </div>
+  <br>
+  <br>
 {% endblock %}

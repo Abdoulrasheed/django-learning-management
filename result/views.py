@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from .decorators import lecturer_required, student_required
 from .forms import *
-from .models import User, Student, Course, CourseAllocation, TakenCourse, Session, Semester
+from .models import User, Student, Course, CourseAllocation, TakenCourse, Session, Semester, CarryOverStudent
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
 from django.contrib.auth import update_session_auth_hash, authenticate
@@ -12,11 +12,12 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 #pdf
 from django.core.files.storage import FileSystemStorage
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
+
 
 
 @login_required
@@ -25,12 +26,66 @@ def home(request):
     students = Student.objects.all().count()
     staff = User.objects.filter(is_lecturer=True).count()
     courses = Course.objects.all().count()
+    current_semester = Semester.objects.get(is_current_semester=True)
+
     context = {
         "no_of_students": students,
         "no_of_staff":staff,
         "no_of_courses": courses,
     }
+
     return render(request, 'result/home.html', context)
+
+def get_chart(request, *args, **kwargs):
+    all_query_score = ()
+    levels = (100, 200, 300, 400, 500)
+
+    for i in levels:
+        all_query_score += (TakenCourse.objects.filter(student__level=i),)
+
+    first_level_total = 0
+    for i in all_query_score[0]:
+        first_level_total += i.total
+    first_level_avg = 0
+    if not all_query_score[0].count() == 0:
+        first_level_avg = first_level_total / all_query_score[0].count()
+
+    second_level_total = 0
+    for i in all_query_score[1]:
+        second_level_total += i.total
+    second_level_avg = 0
+    if not all_query_score[1].count() == 0:
+        second_level_avg = second_level_total / all_query_score[1].count()
+
+    third_level_total = 0
+    for i in all_query_score[2]:
+        third_level_total += i.total
+    third_level_avg = 0
+    if not all_query_score[2].count() == 0:
+        third_level_avg = third_level_total / all_query_score[2].count()
+
+    fourth_level_total = 0
+    for i in all_query_score[3]:
+        fourth_level_total += i.total
+    fourth_level_avg = 0
+    if not all_query_score[3].count() == 0:
+        fourth_level_avg = fourth_level_total / all_query_score[3].count()
+
+    fifth_level_total = 0
+    for i in all_query_score[4]:
+        fifth_level_total += i.total
+    fifth_level_avg = 0
+    if not all_query_score[4].count() == 0:
+        fifth_level_avg = fifth_level_total / all_query_score[4].count()
+
+    labels = ["100 Level", "200 Level", "300 Level", "400 Level", "500 Level"]
+    default_level_average = [first_level_avg, second_level_avg, third_level_avg, fourth_level_avg, fifth_level_avg]
+    average_data = {
+        "labels": labels,
+        "default_level_average": default_level_average,
+    }
+    return JsonResponse(average_data)
+
 
 @login_required
 def profile(request):
@@ -48,7 +103,8 @@ def profile(request):
         }
         return render(request, 'account/profile.html', context)
     else:
-        return render(request, 'account/profile.html', {})
+        staff = User.objects.filter(is_lecturer=True)
+        return render(request, 'account/profile.html', { "staff": staff })
 
 @login_required
 def profile_update(request):
@@ -61,15 +117,18 @@ def profile_update(request):
             user.last_name = form.cleaned_data.get('lastname')
             user.email = form.cleaned_data.get('email')
             user.phone = form.cleaned_data.get('phone')
+            user.picture = form.cleaned_data.get('image')
+            print(form.cleaned_data.get('image'))
             user.save()
             messages.success(request, 'Your profile was successfully edited.')
-
+            return redirect("/profile/")
     else:
         form = ProfileForm(instance=user, initial={
             'firstname': user.first_name,
             'lastname': user.last_name,
             'email': user.email,
             'phone': user.phone,
+            'picture': user.picture,
             })
 
     return render(request, 'account/profile_update.html', {'form': form})
@@ -154,6 +213,7 @@ def session_update_view(request, pk):
 
     else:
         form = SessionForm(instance=session)
+    messages.success(request, 'Updated successfully!')
     return render(request, 'result/session_update.html', {'form': form})
 
 @login_required
@@ -161,6 +221,7 @@ def session_update_view(request, pk):
 def session_delete_view(request, pk):
     semester = get_object_or_404(Semester, pk=pk)
     semester.delete()
+    messages.success(request, 'Deleted successfully!')
     return redirect('manage_semester')
 
 @login_required
@@ -175,9 +236,15 @@ def semester_add_view(request):
     if request.method == 'POST':
         form = SemesterForm(request.POST)
         if form.is_valid():
+            data = form.data.get('is_current_semester') # returns string of 2 if the user selected yes
+            if data == '2':
+                semester = Semester.objects.get(is_current_semester=True)
+                semester.is_current_semester = False
+                semester.save()
+                form.save()
             form.save()
             messages.success(request, 'Semester added successfully ! ')
-
+            return redirect('manage_semester')
     else:
         form = SemesterForm()
     return render(request, 'result/semester_update.html', {'form': form})
@@ -187,7 +254,7 @@ def semester_add_view(request):
 def semester_update_view(request, pk):
     semester = Semester.objects.get(pk=pk)
     if request.method == 'POST':
-        a = request.POST.get('is_current_semester')
+        a = request.POST.get('is_current_semester') # returns string of 2 if the user selected yes for is current semester
         if a == '2':
             unset = Semester.objects.get(is_current_semester=True)
             unset.is_current_semester = False
@@ -196,11 +263,13 @@ def semester_update_view(request, pk):
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Semester updated successfully ! ')
+                return redirect('manage_semester')
         else:
             form = SemesterForm(request.POST, instance=semester)
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Semester updated successfully ! ')
+                return redirect('manage_semester')
 
     else:
         form = SemesterForm(instance=semester)
@@ -302,6 +371,7 @@ def course_edit(request, pk):
         form = CourseAddForm(request.POST, instance=course)
         if form.is_valid():
             course.save()
+            messages.success(request, "Successfully Updated")
             return redirect('course_list')
     else:
         form = CourseAddForm(instance=course)
@@ -319,7 +389,7 @@ class CourseAllocationView(CreateView):
 
     def form_valid(self, form):
         form.save()
-        return redirect('course_list')
+        return redirect('course_allocation_view')
 
 
 @login_required
@@ -336,6 +406,7 @@ def course_registration(request):
             course = Course.objects.get(pk=ids[s])
             obj = TakenCourse.objects.create(student=student, course=course)
             obj.save()
+            messages.success(request, 'Courses Registered Successfully!')
         return redirect('course_registration')
     else:
         student = Student.objects.get(user__pk=request.user.id)
@@ -381,6 +452,7 @@ def course_drop(request):
             course = Course.objects.get(pk=ids[s])
             obj = TakenCourse.objects.get(student=student, course=course)
             obj.delete()
+            messages.success(request, 'Successfully Dropped!')
         return redirect('course_registration')
 
 @login_required
@@ -388,6 +460,7 @@ def course_drop(request):
 def delete_course(request, pk):
     course = get_object_or_404(Course, pk=pk)
     course.delete()
+    messages.success(request, 'Deleted successfully!')
     return redirect('course_list')
 
 @login_required
@@ -412,12 +485,7 @@ def add_score_for(request, id):
     """ 
     Shows a page where a lecturer will add score for studens that are taking courses allocated to him
     in a specific semester and session 
-
     """
-    # 
-    # 
-    # for i in courses:
-    #     total_unit_in_semester += int(i.courseUnit)
     current_semester = Semester.objects.get(is_current_semester=True)
     if request.method == 'GET':
         courses = Course.objects.filter(allocated_course__lecturer__pk=request.user.id)
@@ -466,6 +534,7 @@ def add_score_for(request, id):
                 a.save()
             except:
                 Result.objects.get_or_create(student=student.student, gpa=gpa, semester=current_semester, level=student.student.level)
+        messages.success(request, 'Successfully Recorded! ')
         return HttpResponseRedirect(reverse_lazy('add_score_for', kwargs={'id': id}))
     return HttpResponseRedirect(reverse_lazy('add_score_for', kwargs={'id': id}))
 
@@ -474,9 +543,25 @@ def add_score_for(request, id):
 def view_result(request):
     student = Student.objects.get(user__pk=request.user.id)
     current_semester = Semester.objects.get(is_current_semester=True)
-    courses = TakenCourse.objects.filter(student__user__pk=request.user.id)
-    result = Result.objects.get(student__user__pk=request.user.id, level=student.level, semester=current_semester)
-    return render(request, 'students/view_results.html', {"courses": courses, "result":result, "student": student})
+    courses = TakenCourse.objects.filter(student__user__pk=request.user.id, course__level=student.level)
+    result = Result.objects.filter(student__user__pk=request.user.id)
+    current_semester_grades = {}
+    try:
+        current_semester_grades = Result.objects.get(student__user__pk=request.user.id, level=student.level, semester=current_semester)
+    except:
+        pass
+    previousCGPA = 0
+    for i in result:
+        if not int(i.level) - 100 == 0: # TODO think n check the logic
+            previousCGPA = i.cgpa
+    context = {
+            "courses": courses, 
+            "result":result, 
+            "student": student, 
+            "previousCGPA": previousCGPA, 
+            "current_semester_grades": current_semester_grades}
+
+    return render(request, 'students/view_results.html', context)
 
 @login_required
 def change_password(request):
@@ -493,6 +578,54 @@ def change_password(request):
 	return render(request, 'account/change_password.html', {
 		'form': form,
         })
+
+
+@login_required
+@lecturer_required
+def course_allocation_view(request):
+    allocated_courses = CourseAllocation.objects.all()
+    return render(request, 'course/course_allocation_view.html', {"allocated_courses": allocated_courses})
+
+@login_required
+@lecturer_required
+def withheld_course(request, pk):
+    course = CourseAllocation.objects.get(pk=pk)
+    course.delete()
+    messages.success(request, 'Course was successfully deallocated!')
+    return redirect("course_allocation_view")
+
+
+@login_required
+@lecturer_required
+def carry_over(request):
+    if request.method == "POST":
+        value = ()
+        data = request.POST.copy()
+        data.pop('csrfmiddlewaretoken', None) # remove csrf_token
+        for val in data.values():
+            value += (val,)
+        course = value[0]
+        session = value[1]
+        semester = value[2]
+        level = value[3]
+        courses = CarryOverStudent.objects.filter(course__courseCode=course, semester=semester, session=session, level=level)
+        all_courses = Course.objects.all()
+        semesters = Semester.objects.all()
+        sessions = Session.objects.all()
+        signal_template = True
+        context = {
+                    "all_courses": all_courses,
+                    "courses": courses,
+                    "signal_template": signal_template, 
+                    "semesters": semesters, 
+                    "sessions":sessions 
+        }
+        return render(request, 'course/carry_over.html', context)
+    else:
+        all_courses = Course.objects.all()
+        semesters = Semester.objects.all()
+        sessions = Session.objects.all()
+        return render(request, 'course/carry_over.html',  { "all_courses": all_courses, "semesters": semesters, "sessions":sessions })
 
 @login_required
 @lecturer_required

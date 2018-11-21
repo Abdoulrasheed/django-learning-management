@@ -9,6 +9,14 @@
 
 {% block content %}
 <div class="container-fluid mt-5">
+        {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-success alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
   Add new {{ user_type }}
 <!-- Extended material form grid -->
 <form method="post">{% csrf_token %}

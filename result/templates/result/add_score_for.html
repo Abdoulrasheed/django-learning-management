@@ -8,7 +8,14 @@
 
 {% block content %}
 <div class="container-fluid mt-5">
-
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-success alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
  <!-- Heading -->
     <div class="card mb-4 wow fadeIn">
 	<!--Card content-->
@@ -31,7 +38,7 @@
 		<div class="container">
 		  <div class="row">
 		    <div class="col-md-5">
-		    	<button data-toggle="tooltip" title="Save Score" type="submit" class="btn btn-primary w-25 p-3 float-left">Save</button>
+		    	<button id="submit" data-toggle="tooltip" title="Save Score" type="submit" class="btn btn-primary w-25 p-3 float-left">Save</button>
 		    	<span data-toggle="tooltip" title="Allow editing" id="edit_btn" onclick="toggle_score_edit()" class="btn btn-default w-26 p-3 float-left">Edit</span>
 		    	<span data-toggle="tooltip" title="Print Result sheet" class="btn btn-default w-26 p-3 float-left">
 		    		<a class="white-text" href="{% url 'result_sheet_pdf_view' id=course.id %}">PDF</a>
@@ -40,7 +47,7 @@
 		    <div class="col-md-3"><small>{{ course.courseTitle }}</small></div>
 		    <div class="col-md-4">
 		    	<div class="dropdown">
-	    			<button class="btn btn-info dropdown-toggle float-right" type="button" id="dropdownMenu3" 		data-toggle="dropdown"
+	    			<button class="btn btn-info dropdown-toggle float-right" type="button" id="dropdownMenu3" data-toggle="dropdown"
 		    			aria-haspopup="true" aria-expanded="false">
 		    			{{ course.courseCode }}
 		    		</button>
@@ -79,7 +86,7 @@
 	          		{{ student.student.id_number }}
 	          </td>
 	          <td class="pt-3-half" contenteditable="false">
-	          	<input class="score" type="number" name="{{ student.id }}" value="{{ student.ca }}">
+	          	<input id="ca" class="score" type="number" name="{{ student.id }}" value="{{ student.ca }}">
 	          </td>
 	          <td class="pt-3-half" contenteditable="false">
 	          	<input class="score" type="number" name="{{ student.id }}" value="{{ student.exam }}">

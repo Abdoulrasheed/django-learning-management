@@ -32,5 +32,9 @@ urlpatterns = [
 	path('course/assign/', views.CourseAllocationView.as_view(), name='course_allocation'),
 	path('course/registration/', views.course_registration, name='course_registration'),
 	path('course/drop/', views.course_drop, name='course_drop'),
+	path('course/allocated/', views.course_allocation_view, name='course_allocation_view'),
+	path('course/deallocate/<int:pk>/', views.withheld_course, name='withheld_course'),
+	path('carry_over/', views.carry_over, name='carry_over'),
 	path('result/print/<int:id>/', views.result_sheet_pdf_view, name='result_sheet_pdf_view'),
+	path('api/data/', views.get_chart, name='chart'),
 ]

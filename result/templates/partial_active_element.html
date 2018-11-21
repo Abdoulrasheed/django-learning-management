@@ -48,6 +48,12 @@
         <i class="fa fa-book mr-3" aria-hidden="true"></i>Course Allocation</a>
     {% endif %}
 
+    {% if request.user.is_superuser or request.user.is_lecturer %}
+    <a href="{% url 'course_allocation_view' %}" class="list-group-item 
+        {% if active == 'course_allocation_view' %} active {% endif %} waves-effect">
+        <i class="fa fa-book mr-3" aria-hidden="true"></i>Allocation List</a>
+    {% endif %}
+
     {% if request.user.is_student %}
     <a href="{% url 'course_registration' %}" class="list-group-item 
         {% if active == 'course_registration' %} active {% endif %} waves-effect">

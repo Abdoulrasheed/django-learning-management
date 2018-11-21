@@ -43,8 +43,8 @@ SEMESTER = (
 class User(AbstractUser):
     is_student = models.BooleanField(default=False)
     is_lecturer = models.BooleanField(default=False)
-    phone = models.CharField(max_length=60, blank=True)
-    address = models.CharField(max_length=60, blank=True)
+    phone = models.CharField(max_length=60, blank=True, null=True)
+    address = models.CharField(max_length=60, blank=True, null=True)
     picture = models.ImageField(upload_to="pictures/", blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
 
@@ -164,7 +164,10 @@ class TakenCourse(models.Model):
 
     def is_repeating(self):
         count = CarryOverStudent.objects.filter(student__id=self.student.id)
-        if count.count() >= 6:
+        units = 0
+        for i in count:
+            units += int(i.course.courseUnit)
+        if count.count() >= 6 or units >=16:
             RepeatingStudent.objects.get_or_create(student=self.student, level=self.student.level)
         else:
             try:
@@ -202,6 +205,9 @@ class CourseAllocation(models.Model):
 class CarryOverStudent(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    semester = models.CharField(max_length=100, choices=SEMESTER, blank=True, null=True)
+    session = models.CharField(max_length=100, blank=True, null=True)
+    level = models.CharField(choices=LEVEL, max_length=10, blank=True, null=True)
 
     def __str__(self):
         return self.student.id_number
@@ -219,4 +225,5 @@ class Result(models.Model):
     gpa = models.FloatField(null=True)
     cgpa = models.FloatField(null=True)
     semester = models.CharField(max_length=100, choices=SEMESTER)
+    session = models.CharField(max_length=100, blank=True, null=True)
     level = models.CharField(max_length=100, choices=LEVEL)

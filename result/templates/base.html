@@ -16,8 +16,6 @@
         <!-- Your custom styles (optional) -->
         <link href="{% static 'css/style.css' %}" rel="stylesheet">
     </head>
-
-
     <body class="grey lighten-3">
 
     <!--Main Navigation-->
@@ -49,23 +47,19 @@
                                 <i class="fa mr-3"></i>{{ current_session }}
                             </a>
                             {% else %}
-                            <a href="#" class="nav-link border border-light rounded waves-effect">
-                                <i class="fa mr-3"></i>{{ current_session }}
+                            <a href="#" class="nav-link border border-light rounded waves-effect green-text">
+                                <i class="fa fa-cogs mr-3"></i>{{ current_session }}
                             </a>
                             {% endif %}
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link border border-light rounded waves-effect">
-                                {% if user.is_authenticated %}
-                                <i class="fa fa-user mr-3"></i>{{ user|upper }}
-                                {% else %}
-                                <a class="fa fa-user mr-3" href="/accounts/login">login</a>
-                                {% endif %}
+                            <a href="{% url 'profile' %}" class="nav-link border border-light rounded waves-effect blue-text">
+                                <i  class="fa fa-user mr-3"></i>{{ user|capfirst }}
                             </a>
                         </li>
 
                          <li class="nav-item">
-                            <a href="/accounts/logout/" class="nav-link border border-light rounded waves-effect">
+                            <a href="/accounts/logout/" class="nav-link border border-light rounded waves-effect red-text">
                                 <i class="fa fa-unlock mr-3"></i>Logout
                             </a>
                         </li>
@@ -76,7 +70,6 @@
             </div>
         </nav>
         <!-- Navbar -->
-
         <!-- Sidebar -->
         <div class="sidebar-fixed position-fixed">
 
@@ -119,6 +112,9 @@
     <!-- MDB core JavaScript -->
     <script type="text/javascript" src="{% static 'js/mdb.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/tooltips.js' %}"></script>
-
+     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    {% block js %}
+       
+    {% endblock js %}
     </body>
 </html>

@@ -232,9 +232,10 @@ class CourseAddForm(forms.ModelForm):
         label = "*Semester",
     )
 
+    is_elective = forms.BooleanField(label = "*is_elective", required=False)
     class Meta:
         model = Course
-        fields = ['courseCode', 'courseTitle', 'courseUnit', 'level', 'description', 'semester']
+        fields = ['courseCode', 'courseTitle', 'courseUnit', 'level', 'description', 'semester', 'is_elective']
 
 
 
@@ -322,16 +323,21 @@ class ProfileForm(forms.ModelForm):
         label="Email",
         max_length=75,
         required=False)
-    mobile = forms.CharField(
+    phone = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         label="Phone Number",
         max_length=16,
         required=False)
 
+    picture = forms.ImageField(
+        widget=forms.FileInput(attrs={'class': 'form-control'}),
+        label="Upload picture",
+        required=False)
+
     class Meta:
-        model = Student
+        model = User
         fields = ['firstname', 'lastname',
-                  'email', 'mobile']
+                  'email', 'phone', 'picture']
 
 class SessionForm(forms.ModelForm):
     class Meta:

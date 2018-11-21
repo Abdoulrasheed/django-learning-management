@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %} Carry Over Students | ARMS {% endblock title %}
+
+{% block content %}
+
+<div class="container-fluid mt-5">
+          {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-success alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+<div class="card">
+	    <h5 class="card-header info-color white-text text-center py-4">
+        <strong>Carry over students</strong>
+    </h5>
+
+    <div class="card-body px-lg-5 pt-0">
+    	<form method="POST" action="{% url 'carry_over' %}">{% csrf_token %}
+    	<label>Select Course</label>
+    	
+    	<select name="course">
+    		{% for course in all_courses %} 
+    			<option value="{{ course.courseCode }}">{{ course.courseCode }} </option>
+    		{% endfor %}
+    	</select>
+    	
+    	<label>Select Session</label>
+    	<select name="session">
+    	{% for session in sessions %} 
+    		
+    		<option value="{{ session.session }}">{{ session.session }} </option>
+
+    	{% endfor %}
+    	</select>
+    	
+    	<label>Select Semester</label>
+    	
+    	<select name="semester">
+    	{% for semester in semesters %} 
+    		<option value="{{ semester.semester }}">{{ semester.semester }} Semester </option>
+    	{% endfor %}
+    	</select>
+
+    	<label>For Level</label>
+    	<select name="level">
+    		<option value="100">100</option>
+    		<option value="200">200</option>
+    		<option value="300">300</option>
+    		<option value="400">400</option>
+    		<option value="500">500</option>
+    	</select>
+    	<button type="submit">Get List</button>
+    </form>
+</div>
+</div>
+{% if signal_template %}
+<div class="table-wrapper-scroll-y">
+	<table class="table table-bordered table-striped">
+		<thead>
+			<tr>
+				<th scope="col">#</th>
+                <th scope="col">Student</th>
+                <th scope="col">Course</th>
+                {% if request.user.is_superuser %}
+                <th scope="col">Action</th>
+                {% endif %}
+                </tr>
+                </thead>
+                {% for course in courses %}
+                <tbody>
+                    <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ course.student }}</td>
+                    <td>{{ course.courseCode }}</td>
+                	{% if request.user.is_superuser %}
+                    <td>
+                    	<a data-toggle="tooltip" title="delete" href="" class="red-text"><i class="fa fa-times"></i></a>
+                    </td>
+                	{% endif %}
+                	</tr>
+                {% empty %}
+                    <tr>
+                    <td></td>
+                    <td></td>
+                    <td>
+                  	  <span>No carry over student</span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    </tr>
+                    </tbody>
+                {% endfor %}
+                 </table>
+            </div>
+ {% endif %}
+{% endblock %}

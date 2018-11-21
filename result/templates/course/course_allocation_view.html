@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %} Allocated Course lists | ARMS {% endblock title %}
+
+{% block side_bar %}
+    {% include 'partial_active_element.html' with active='course_allocation_view' %}
+{% endblock %}
+{% block content %}
+
+
+<style type="text/css">
+  .table-wrapper-scroll-y {
+    display: block;
+    max-height: 350px;
+    overflow-y: auto;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+  }
+</style>
+	<div class="container-fluid mt-5">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-success alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+            <!-- Heading -->
+            <div class="card mb-4 wow fadeIn">
+
+                <!--Card content-->
+                <div class="card-body d-sm-flex justify-content-between">
+
+                    <h6 class="mb-2 mb-sm-0 pt-1">
+                        <a href="/">Home Page</a>
+                        <span>/</span>
+                        <span>Allocated Courses</span>
+                    </h6>
+                </div>
+
+            </div>
+            <h6 class="mb-2 mb-sm-0 pt-1">
+            <a class="pull-right btn btn-default btn-rounded mb-3" href="" class="btn btn-default btn-rounded mb-4">
+               <i class="fa fa-file-pdf-o" aria-hidden="true"></i> PDF
+            </a>
+            </h6>
+
+                <!--Card content-->
+  <div class="table-wrapper-scroll-y">
+
+  <table class="table table-bordered table-striped">
+                     <thead>
+                        <tr>
+                          <th scope="col">#</th>
+                          <th scope="col">Lecturer</th>
+                          <th scope="col">Courses</th>
+                          {% if request.user.is_superuser %}
+                          <th scope="col">Action</th>
+                          {% endif %}
+                        </tr>
+                    </thead>
+                {% for course in allocated_courses %}
+                    <tbody>
+                        <tr>
+                          <th scope="row">{{ forloop.counter }}</th>
+                          <td>{{ course.lecturer }}</td>
+                          <td>{% for i in course.courses.all %}{{ i }},{% endfor %}</td>
+                          {% if request.user.is_superuser %}
+                          <td>
+                            <a data-toggle="tooltip" title="withheld" href="{% url 'withheld_course' pk=course.pk %}" class="red-text"><i class="fa fa-times"></i></a>
+                          </td>
+                          {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                          <td></td>
+                          <td></td>
+                          <td>
+                          <span>No Course Allocated 
+                            <a href="{% url 'course_allocation_view' %}">
+                            <i class="blue-text">
+                              Allocate now
+                            </i>
+                            </a>
+                          </span>
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        </tr>
+                    </tbody>
+                {% endfor %}
+                 </table>
+            </div>
+        </div>
+        <br>
+{% endblock %}
