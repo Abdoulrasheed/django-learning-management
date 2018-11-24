@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %} Student lists | ARMS {% endblock title %}
+
+{% block side_bar %}
+    {% include 'partial_active_element.html' with active='Dashboard' %}
+{% endblock %}
+{% block content %}
+<style type="text/css">
+  .table-wrapper-scroll-y {
+display: block;
+max-height: 350px;
+overflow-y: auto;
+-ms-overflow-style: -ms-autohiding-scrollbar;
+}
+</style>
+	<div class="container-fluid mt-5">
+
+            <!-- Heading -->
+            <div class="card mb-4 wow fadeIn">
+
+                <!--Card content-->
+                <div class="card-body d-sm-flex justify-content-between">
+
+                    <h6 class="mb-2 mb-sm-0 pt-1">
+                        <a href="/">Home Page</a>
+                        <span>/</span>
+                        <span>Repeaters</span>
+                    </h6>
+                </div>
+
+            </div>
+            {% if request.user.is_superuser %}
+            <!-- Heading -->
+            <h6 class="mb-2 mb-sm-0 pt-1">
+            <a class="pull-right btn btn-default btn-rounded mb-3" href="" class="btn btn-default btn-rounded mb-4">
+               <i class="fa fa-file-pdf-o" aria-hidden="true"></i> Print
+            </a>
+            </h6>
+            {% endif %}
+          </div>
+
+                <!--Card content-->
+  <div class="table-wrapper-scroll-y">
+
+  <table class="table table-bordered table-striped">
+                     <thead>
+                        <tr>
+                          <th scope="col">#</th>
+                          <th scope="col">ID Number</th>
+                          <th scope="col">Level</th>
+                          <th scope="col">Session</th>
+                          {% if request.user.is_superuser %}
+                          <th scope="col">Action</th>
+                          {% endif %}
+                        </tr>
+                    </thead>
+                {% for student in students %}
+                    <tbody>
+                        <tr>
+                          <th scope="row">{{ forloop.counter }}</th>
+                          <td>{{ student.id_number }}</td>
+                          <td>{{ student.level }}</td>
+                          <td>{{ student.session }}</td>
+                          {% if request.user.is_superuser %}
+                          <td>
+                            <a data-toggle="tooltip" title="View" class="blue-text"><i class="fa fa-user"></i></a>
+                            <a data-toggle="tooltip" title="Edit" href="{% url 'edit_student' pk=student.pk %}" title="edit" class="teal-text"><i class="fa fa-pencil"></i></a>
+                            <a data-toggle="tooltip" title="Delete" href="{% url 'delete_student' pk=student.pk %}" class="red-text"><i class="fa fa-times"></i></a>
+                          </td>
+                          {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                          <td></td>
+                          <td></td>
+                          <td>
+                          <span>No student available</span>
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        </tr>
+                    </tbody>
+                {% endfor %}
+                 </table>
+            </div>
+        </div>
+        <br>
+{% endblock %}

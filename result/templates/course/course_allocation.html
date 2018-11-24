@@ -34,14 +34,14 @@
     </div>
     <div class="col-lg-6 col-md-6">
       <div class="card">
-        <h3 class="card-header light-blue lighten-1 white-text text-uppercase font-weight-bold text-center py-5">
+        <small class="card-header light-blue lighten-1 white-text text-uppercase font-weight-bold text-center py-5">
             Assign Courses
-          </h3>
+          </small>
         <div class="card-body">
           <ul class="list-group">
             <li class="list-group-item d-flex justify-content-between align-items-center">
-              {{ form.lecturer.label }}
-                {{ form.lecturer }}
+              {{ form.lecturer.label }}:
+                <small>{{ form.lecturer }}</small>
                 <span class="badge badge-primary badge-pill">
                 {{ form.lecturer|length|add:-1 }} 
                 ({{ form.lecturer|length|add:-1|apnumber }}) 
@@ -49,7 +49,7 @@
               </li>
               {% for course in form.courses %}
               <li class="list-group-item d-flex justify-content-between align-items-center">
-                {{ course }}
+                <small class="text-muted">{{ course }}</small>
                 <span class="badge badge-primary badge-pill fa fa-check"></span>
                 {% empty %}
                 <span class="badge badge-primary badge-pill">
@@ -65,8 +65,7 @@
           <span class="badge badge-primary badge-pillt">
             <a href="#" class="text-white"><i class="fa fa-file-pdf-o" aria-hidden="true"></i> PDF</a>
           </span>
-          <span class="badge badge-primary badge-pill pull-right">{{ form.courses|length }} 
-            registered course{{ form.courses|length|pluralize }}
+          <span class="badge badge-primary badge-pill pull-right">All course{{ form.courses|length|pluralize }}:{{ form.courses|length }} 
           </span>
         </div>
       </div>

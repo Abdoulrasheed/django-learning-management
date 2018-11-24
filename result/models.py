@@ -59,8 +59,8 @@ class User(AbstractUser):
 
     def get_full_name(self):
         full_name = self.username
-        if self.first_name and self.lastname:
-            full_name = self.filename + " " + self.lastname
+        if self.first_name and self.last_name:
+            full_name = self.first_name + " " + self.last_name
         return full_name
 
 class Session(models.Model):
@@ -91,7 +91,7 @@ class Course(models.Model):
     is_elective = models.BooleanField(default=False, blank=True, null=True)
 
     def __str__(self):
-        return self.courseCode
+        return self.courseCode + " (" + self.courseTitle + ")"
 
     def get_absolute_url(self):
         return reverse('course_list', kwargs={'pk': self.pk})
@@ -126,8 +126,6 @@ class TakenCourse(models.Model):
     def get_absolute_url(self):
         return reverse('update_score', kwargs={'pk': self.pk})
 
-    def __str__(self):
-    	return self.course.courseTitle
 
     def get_total(self, ca, exam):
         return int(ca) + int(exam)
@@ -176,7 +174,8 @@ class TakenCourse(models.Model):
                 pass
 
     def calculate_gpa(self, total_unit_in_semester):
-        student = TakenCourse.objects.filter(student=self.student, course__level=self.student.level)
+        current_semester = Semester.objects.get(is_current_semester=True)
+        student = TakenCourse.objects.filter(student=self.student, course__level=self.student.level, course__semester=current_semester)
         p = 0
         point = 0
         for i in student:
@@ -192,8 +191,37 @@ class TakenCourse(models.Model):
             else:
                 point = 0
             p += int(courseUnit) * point
-        gpa = (p / total_unit_in_semester)
-        return gpa
+        try:
+            gpa = (p / total_unit_in_semester)
+            return round(gpa, 1)
+        except ZeroDivisionError:
+            return 0
+    
+    def calculate_cgpa(self):
+        current_semester = Semester.objects.get(is_current_semester=True)
+        previousResult = Result.objects.filter(student__id=self.student.id, level__lt=self.student.level)
+        previousCGPA = 0
+        for i in previousResult:
+            previousCGPA += i.cgpa
+        cgpa = 0
+        if str(current_semester) == SECOND:
+            try:
+                first_sem_gpa = Result.objects.get(student=self.student.id, semester=FIRST, level=self.student.level) 
+            except:
+                first_sem_gpa = 0
+
+            try:
+                sec_sem_gpa = Result.objects.get(student=self.student.id, semester=SECOND, level=self.student.level) 
+            except:
+                sec_sem_gpa = 0
+
+            taken_courses = TakenCourse.objects.filter(student=self.student, student__level=self.student.level)
+            TCU = 0
+            for i in taken_courses:
+                TCU += int(i.course.courseUnit)
+            cgpa = first_sem_gpa.gpa + sec_sem_gpa.gpa / TCU
+            return round(cgpa, 2)
+
 
 class CourseAllocation(models.Model):
 	lecturer = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -216,6 +244,7 @@ class CarryOverStudent(models.Model):
 class RepeatingStudent(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     level = models.CharField(max_length=100, choices=LEVEL)
+    session = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return self.student.id_number

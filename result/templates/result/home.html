@@ -1,10 +1,11 @@
  {% extends 'base.html' %}
  {% load humanize %}
 {% block title %} Dashboard | ARMS {% endblock title %}
-{% block js %} 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js" integrity="sha256-oSgtFCCmHWRPQ/JmR4OoZ3Xke1Pw4v50uh6pLcu+fIc=" crossorigin="anonymous"></script>
 
-    <script type="text/javascript">
+{% block js %} 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js" integrity="sha256-oSgtFCCmHWRPQ/JmR4OoZ3Xke1Pw4v50uh6pLcu+fIc=" crossorigin="anonymous"></script>
+
+<script type="text/javascript">
         var endpoint = 'api/data/'
         var default_level_average = []
         var labels = []
@@ -21,87 +22,86 @@
                 console.log(error_data)
             },
         })
-
-function setAverageGraph(){
-    var ctx = document.getElementById("students_avg_bar").getContext('2d');
-    var ctx2 = document.getElementById("students_avg_doughnut").getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: '# Based on students performance (Average)',
-                data: default_level_average,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255,99,132,1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero:true
-                        }
+        function setAverageGraph(){
+        var ctx = document.getElementById("students_avg_bar").getContext('2d');
+        var ctx2 = document.getElementById("students_avg_doughnut").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '# Based on students performance (Average)',
+                    data: default_level_average,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255,99,132,1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
                     }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true
+                            }
+                        }]
+                    }
                 }
-            }
-        });
+            });
 
-        var myChart = new Chart(ctx2, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: '# Based on students performance (Average)',
-                data: default_level_average,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255,99,132,1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero:true
-                        }
+            var myChart = new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '# Based on students performance (Average)',
+                    data: default_level_average,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255,99,132,1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
                     }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true
+                            }
+                        }]
+                    }
                 }
-            }
-        });
-}
+            });
+        }
 </script>
 {% endblock js %}
- {% block content %}
+{% block content %}
  <div class="container-fluid mt-5">
 
             <!-- Heading -->
@@ -177,7 +177,7 @@ function setAverageGraph(){
 
                     <!--Card-->
                     <div class="card">
-                        <a href="{% url 'course_list' %}">
+                        <a href="{% if not request.user.is_student %}{% url 'course_list' %}{% else %} # {% endif %}">
                         <!-- Card header -->
                         <div  class="card-header waves-effect">
                         Course{{ no_of_courses|pluralize }}
@@ -197,6 +197,75 @@ function setAverageGraph(){
                 </div>
                 <div class="col-lg-7 col-md-10 mb-10">
                     <canvas id="students_avg_doughnut" width="400" height="150"></canvas>
+                </div>
+            </div>
+            <hr />
+            <div class="row wow fadeIn">
+            <div class="col-lg-4 col-md-12 mb-4">
+
+                    <!--Card-->
+                    
+                    <div class="card">
+                        <a href="{% if not request.user.is_student %}{% url 'repeat_list' %}{% else %} # {% endif %}">
+                        <!-- Card header -->
+                        <div class="card-header waves-effect">Repeating Student{{ no_of_students_to_repeat|pluralize }}</div>
+
+                        <!--Card content-->
+                        <div data-toggle="tooltip" title="{{ no_of_students_to_repeat|apnumber }} student{{ no_of_students_to_repeat|pluralize }} to repeat a level" class="card-body waves-effect">
+
+                            <span class="badge badge-info">{{ no_of_students_to_repeat|apnumber }} ({{ no_of_students_to_repeat }})</span>
+
+                        </div>
+                        </a>
+
+                    </div>
+                    
+                    <!--/.Card-->
+
+                </div>
+                <div class="col-lg-4 col-md-12 mb-4">
+
+                    <!--Card-->
+                    
+                    <div class="card">
+                        <a href="{% if not request.user.is_student %}{% url 'carry_over' %}{% else %} # {% endif %}">
+                        <!-- Card header -->
+                        <div class="card-header waves-effect">Carry over Student{{ no_of_carry_over_students|pluralize }}</div>
+
+                        <!--Card content-->
+                        <div data-toggle="tooltip" title="{{ no_of_carry_over_students|apnumber }} carry over student{{ no_of_carry_over_students|pluralize }}" class="card-body waves-effect">
+
+                            <span class="badge badge-info">{{ no_of_carry_over_students|apnumber }} ({{ no_of_carry_over_students }})</span>
+
+                        </div>
+                        </a>
+
+                    </div>
+                    
+                    <!--/.Card-->
+
+                </div>
+                <div class="col-lg-4 col-md-12 mb-4">
+
+                    <!--Card-->
+                    
+                    <div class="card">
+                        <a href="{% if not request.user.is_student %}{% url 'first_class_list' %}{% else %} # {% endif %}">
+                        <!-- Card header -->
+                        <div class="card-header waves-effect">1st Class Student{{ no_of_1st_class_students|pluralize }}</div>
+
+                        <!--Card content-->
+                        <div data-toggle="tooltip" title="{{ no_of_1st_class_students|apnumber }} first class student{{ no_of_1st_class_students|pluralize }}" class="card-body waves-effect">
+
+                            <span class="badge badge-info">{{ no_of_1st_class_students|apnumber }} ({{ no_of_1st_class_students }})</span>
+
+                        </div>
+                        </a>
+
+                    </div>
+                    
+                    <!--/.Card-->
+
                 </div>
             </div>
 {% endblock %} }

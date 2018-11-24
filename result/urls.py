@@ -34,7 +34,9 @@ urlpatterns = [
 	path('course/drop/', views.course_drop, name='course_drop'),
 	path('course/allocated/', views.course_allocation_view, name='course_allocation_view'),
 	path('course/deallocate/<int:pk>/', views.withheld_course, name='withheld_course'),
-	path('carry_over/', views.carry_over, name='carry_over'),
+	path('students/carry-over-list/', views.carry_over, name='carry_over'),
+	path('students/repeat-list/', views.repeat_list, name='repeat_list'),
+	path('students/1st_class_list/', views.first_class_list, name='first_class_list'),
 	path('result/print/<int:id>/', views.result_sheet_pdf_view, name='result_sheet_pdf_view'),
 	path('api/data/', views.get_chart, name='chart'),
 ]

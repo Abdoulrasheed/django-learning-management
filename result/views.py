@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from .decorators import lecturer_required, student_required
 from .forms import *
-from .models import User, Student, Course, CourseAllocation, TakenCourse, Session, Semester, CarryOverStudent
+from .models import User, Student, Course, CourseAllocation, TakenCourse, Session, Semester, CarryOverStudent, RepeatingStudent
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
 from django.contrib.auth import update_session_auth_hash, authenticate
@@ -22,16 +22,26 @@ from reportlab.lib.units import inch
 
 @login_required
 def home(request):
-    """ Shows the dashboard of the website containing list of students, courses and lecturers """
+    """ 
+    Shows our dashboard containing number of students, courses, lecturers, repating students, 
+    carry over students and 1st class students in an interactive graph
+
+    """
     students = Student.objects.all().count()
     staff = User.objects.filter(is_lecturer=True).count()
     courses = Course.objects.all().count()
     current_semester = Semester.objects.get(is_current_semester=True)
+    no_of_1st_class_students = Result.objects.filter(cgpa__gte=4.5).count()
+    no_of_carry_over_students = CarryOverStudent.objects.all().count()
+    no_of_students_to_repeat = RepeatingStudent.objects.all().count()
 
     context = {
         "no_of_students": students,
         "no_of_staff":staff,
         "no_of_courses": courses,
+        "no_of_1st_class_students": no_of_1st_class_students,
+        "no_of_students_to_repeat": no_of_students_to_repeat,
+        "no_of_carry_over_students": no_of_carry_over_students,
     }
 
     return render(request, 'result/home.html', context)
@@ -109,16 +119,17 @@ def profile(request):
 @login_required
 def profile_update(request):
     """ Check if the fired request is a POST then grap changes and update the records otherwise we show an empty form """
-    user = request.user
+    user = request.user.id
+    user = User.objects.get(pk=user)
     if request.method == 'POST':
         form = ProfileForm(request.POST)
         if form.is_valid():
-            user.first_name = form.cleaned_data.get('firstname')
-            user.last_name = form.cleaned_data.get('lastname')
+            user.first_name = form.cleaned_data.get('first_name')
+            user.last_name = form.cleaned_data.get('last_name')
             user.email = form.cleaned_data.get('email')
             user.phone = form.cleaned_data.get('phone')
-            user.picture = form.cleaned_data.get('image')
-            print(form.cleaned_data.get('image'))
+            user.picture = form.cleaned_data.get('picture')
+            print(form.cleaned_data.get('picture'))
             user.save()
             messages.success(request, 'Your profile was successfully edited.')
             return redirect("/profile/")
@@ -254,15 +265,15 @@ def semester_add_view(request):
 def semester_update_view(request, pk):
     semester = Semester.objects.get(pk=pk)
     if request.method == 'POST':
-        a = request.POST.get('is_current_semester') # returns string of 2 if the user selected yes for is current semester
-        if a == '2':
+        if request.POST.get('is_current_semester') == 'True': # returns string of 'True' if the user selected yes for is current semester
             unset = Semester.objects.get(is_current_semester=True)
             unset.is_current_semester = False
+            print(unset)
             unset.save()
             form = SemesterForm(request.POST, instance=semester)
             if form.is_valid():
                 form.save()
-                messages.success(request, 'Semester updated successfully ! ')
+                messages.success(request, 'Semester updated successfully !')
                 return redirect('manage_semester')
         else:
             form = SemesterForm(request.POST, instance=semester)
@@ -338,7 +349,7 @@ def edit_student(request, pk):
     if request.method == "POST":
         form = StudentAddForm(request.POST, instance=student)
         if form.is_valid():
-            student.save()
+            form.save()
             return redirect('student_list')
     else:
         form = StudentAddForm(instance=student)
@@ -388,7 +399,21 @@ class CourseAllocationView(CreateView):
         return kwargs
 
     def form_valid(self, form):
-        form.save()
+        # if a staff has been allocated a course before update it else create new
+        lecturer = form.cleaned_data['lecturer']
+        selected_courses = form.cleaned_data['courses']
+        courses = ()
+        for course in selected_courses:
+            courses += (course.pk,)
+        print(courses)
+
+        try:
+            a = CourseAllocation.objects.get(lecturer=lecturer)
+        except:
+            a = CourseAllocation.objects.create(lecturer=lecturer)
+        for i in range(0, selected_courses.count()):
+            a.courses.add(courses[i])
+        a.save()
         return redirect('course_allocation_view')
 
 
@@ -488,7 +513,7 @@ def add_score_for(request, id):
     """
     current_semester = Semester.objects.get(is_current_semester=True)
     if request.method == 'GET':
-        courses = Course.objects.filter(allocated_course__lecturer__pk=request.user.id)
+        courses = Course.objects.filter(allocated_course__lecturer__pk=request.user.id).filter(semester=current_semester)
         course = Course.objects.get(pk=id)
         students = TakenCourse.objects.filter(course__allocated_course__lecturer__pk=request.user.id).filter(course__id=id).filter(course__semester=current_semester)
         context = {
@@ -506,7 +531,7 @@ def add_score_for(request, id):
             ids = ids + (str(key),)      # gather all the all students id (i.e the keys) in a tuple
         for s in range(0,len(ids)):      # iterate over the list of student ids gathered above
             student = TakenCourse.objects.get(id=ids[s])
-            courses = Course.objects.filter(level=student.student.level).filter(semester=current_semester)
+            courses = Course.objects.filter(level=student.student.level).filter(semester=current_semester) # all courses of a specific level in current semester
             total_unit_in_semester = 0
             for i in courses:
                 if i == courses.count():
@@ -525,12 +550,12 @@ def add_score_for(request, id):
             obj.carry_over(obj.grade)
             obj.is_repeating()
             obj.save()
-            print("unit in is_current_semester=",total_unit_in_semester)
             gpa = obj.calculate_gpa(total_unit_in_semester)
-            print(gpa)
+            cgpa = obj.calculate_cgpa()
             try:
-                a = a = Result.objects.get(student=student.student, semester=current_semester, level=student.student.level)
+                a = Result.objects.get(student=student.student, semester=current_semester, level=student.student.level)
                 a.gpa = gpa
+                a.cgpa = cgpa
                 a.save()
             except:
                 Result.objects.get_or_create(student=student.student, gpa=gpa, semester=current_semester, level=student.student.level)
@@ -546,20 +571,24 @@ def view_result(request):
     courses = TakenCourse.objects.filter(student__user__pk=request.user.id, course__level=student.level)
     result = Result.objects.filter(student__user__pk=request.user.id)
     current_semester_grades = {}
-    try:
-        current_semester_grades = Result.objects.get(student__user__pk=request.user.id, level=student.level, semester=current_semester)
-    except:
-        pass
+
     previousCGPA = 0
+    previousLEVEL = 0
+
     for i in result:
         if not int(i.level) - 100 == 0: # TODO think n check the logic
-            previousCGPA = i.cgpa
+            previousLEVEL = i.level
+            a = Result.objects.get(student__user__pk=request.user.id, level=previousLEVEL, semester="Second")
+            previousCGPA = a.cgpa
+            break
+        else:
+            break
     context = {
             "courses": courses, 
             "result":result, 
             "student": student, 
-            "previousCGPA": previousCGPA, 
-            "current_semester_grades": current_semester_grades}
+            "previousCGPA": previousCGPA,
+            }
 
     return render(request, 'students/view_results.html', context)
 
@@ -591,12 +620,11 @@ def course_allocation_view(request):
 def withheld_course(request, pk):
     course = CourseAllocation.objects.get(pk=pk)
     course.delete()
-    messages.success(request, 'Course was successfully deallocated!')
+    messages.success(request, 'successfully deallocated!')
     return redirect("course_allocation_view")
 
 
 @login_required
-@lecturer_required
 def carry_over(request):
     if request.method == "POST":
         value = ()
@@ -606,26 +634,33 @@ def carry_over(request):
             value += (val,)
         course = value[0]
         session = value[1]
-        semester = value[2]
-        level = value[3]
-        courses = CarryOverStudent.objects.filter(course__courseCode=course, semester=semester, session=session, level=level)
+        courses = CarryOverStudent.objects.filter(course__courseCode=course, session=session)
+        print(courses)
         all_courses = Course.objects.all()
-        semesters = Semester.objects.all()
         sessions = Session.objects.all()
         signal_template = True
         context = {
                     "all_courses": all_courses,
                     "courses": courses,
                     "signal_template": signal_template, 
-                    "semesters": semesters, 
                     "sessions":sessions 
         }
         return render(request, 'course/carry_over.html', context)
     else:
         all_courses = Course.objects.all()
-        semesters = Semester.objects.all()
         sessions = Session.objects.all()
-        return render(request, 'course/carry_over.html',  { "all_courses": all_courses, "semesters": semesters, "sessions":sessions })
+        return render(request, 'course/carry_over.html',  { "all_courses": all_courses, "sessions":sessions })
+
+
+@login_required
+def repeat_list(request):
+    students = RepeatingStudent.objects.all()
+    return render(request, 'students/repeaters.html', {"students": students})
+
+@login_required
+def first_class_list(request):
+    students = Result.objects.filter(cgpa__gte=4.5)
+    return render(request, 'students/first_class_students.html', {"students": students})
 
 @login_required
 @lecturer_required
@@ -649,5 +684,4 @@ def result_sheet_pdf_view(request, id):
         response = HttpResponse(pdf, content_type='application/pdf')
         response['Content-Disposition'] = 'inline; filename="somefilename.pdf"'
         return response
-
     return response

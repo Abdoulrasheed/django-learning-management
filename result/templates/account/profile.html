@@ -40,8 +40,8 @@ overflow-y: auto;
   <!-- Card image -->
   <div class="view overlay">
     <img class="card-img-top" src="{{ request.user.get_picture }}" alt="User Image">
-    <a href="#!">
-      <div class="mask rgba-white-slight"></div>
+    <a class="mask" href="{% url 'edit_profile' %}">
+      <div class="mask white-text">Change Picture</div>
     </a>
   </div>
 
@@ -138,9 +138,9 @@ overflow-y: auto;
     {% for course in courses %}
     <tr>
       <th scope="row">{{ forloop.counter }}</th>
-      <td>{{ course.courseCode }}</td>
-      <td>{{ course }}</td>
-      <td>{{ course.courseUnit }}</td>
+      <td>{{ course.course.courseCode }}</td>
+      <td>{{ course.course.courseTitle }}</td>
+      <td>{{ course.course.courseUnit }}</td>
     </tr>
     {% empty %}
     <tr>

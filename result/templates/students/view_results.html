@@ -76,30 +76,23 @@ overflow-y: auto;
 </div>
 <br>
 <tbody>
+  {% for result in result %}
+  {% if result.semester == "First" %}
   <tr>
     <th scope="row"></th>
     <th></th>
-    {% for result in result %}
-    {% if result.level == student.level %}
-    <th><label>Current GPA:</label> {{ result.gpa }}</th>
+    <th><label>First Semester GPA:</label> {{ result.gpa }}</th>
   </tr>
   <br>
-  <tr>
+  {% elif result.semester == "Second" %}
+    <tr>
     <th scope="row"></th>
     <th></th>
-    <th><label>Current CGPA:</label> {{ result.gpa }}</th>
+    <th><label>Second Semester GPA:</label> {{ result.gpa }}</th>
   </tr>
+  <br>
   {% endif %}
-  {% empty %}
-  <th><label>Current GPA:</label> 0.0</th>
-  <br>
-  <tr>
-    <th scope="row"></th>
-    <th></th>
-    <th><label>Current CGPA:</label> 0.0</th>
-  </tr>
   {% endfor %}
-  <br>
   <tr>
     <th scope="row"></th>
     <th></th>

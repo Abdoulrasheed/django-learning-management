@@ -13,89 +13,96 @@
           </div>
         {% endfor %}
       {% endif %}
-<div class="card">
-	    <h5 class="card-header info-color white-text text-center py-4">
-        <strong>Carry over students</strong>
-    </h5>
 
-    <div class="card-body px-lg-5 pt-0">
-    	<form method="POST" action="{% url 'carry_over' %}">{% csrf_token %}
-    	<label>Select Course</label>
-    	
-    	<select name="course">
-    		{% for course in all_courses %} 
-    			<option value="{{ course.courseCode }}">{{ course.courseCode }} </option>
-    		{% endfor %}
-    	</select>
-    	
-    	<label>Select Session</label>
-    	<select name="session">
-    	{% for session in sessions %} 
-    		
-    		<option value="{{ session.session }}">{{ session.session }} </option>
+    <!-- Heading -->
+    <div class="card mb-4 wow fadeIn">
+    <!--Card content-->
+    <div class="card-body d-sm-flex justify-content-between">
+        <h6 class="mb-2 mb-sm-0 pt-1">
+            <a href="/">Home Page</a>
+            <span>/</span>
+            <span>Repeaters</span>
+        </h6>
+    </div>
 
-    	{% endfor %}
-    	</select>
-    	
-    	<label>Select Semester</label>
-    	
-    	<select name="semester">
-    	{% for semester in semesters %} 
-    		<option value="{{ semester.semester }}">{{ semester.semester }} Semester </option>
-    	{% endfor %}
-    	</select>
+    </div>
 
-    	<label>For Level</label>
-    	<select name="level">
-    		<option value="100">100</option>
-    		<option value="200">200</option>
-    		<option value="300">300</option>
-    		<option value="400">400</option>
-    		<option value="500">500</option>
-    	</select>
-    	<button type="submit">Get List</button>
-    </form>
-</div>
-</div>
+    <div class="card">
+    	    <h5 class="card-header info-color white-text text-center py-4">
+            <strong>Carry over students</strong>
+        </h5>
+
+        <div class="card-body px-lg-5 pt-0">
+            <br>
+        	<form method="POST" action="{% url 'carry_over' %}">{% csrf_token %}
+        	<label>Select Course</label>
+        	
+        	<select class="btn-default" name="course">
+                <option>-----</option>
+        		{% for course in all_courses %} 
+        			<option value="{{ course.courseCode }}">{{ course.courseCode }} </option>
+        		{% endfor %}
+        	</select>
+        	
+        	<label>Select Session</label>
+        	<select class="btn-default" name="session">
+                <option>------</option>
+        	{% for session in sessions %} 
+        		<option value="{{ session.session }}">{{ session.session }} </option>
+        	{% endfor %}
+        	</select>
+        	<button class="btn bnt-primary blue-text pull-right" type="submit">Get List</button>
+        </form>
+    </div>
+    </div>
 {% if signal_template %}
-<div class="table-wrapper-scroll-y">
-	<table class="table table-bordered table-striped">
-		<thead>
-			<tr>
-				<th scope="col">#</th>
-                <th scope="col">Student</th>
-                <th scope="col">Course</th>
-                {% if request.user.is_superuser %}
-                <th scope="col">Action</th>
-                {% endif %}
-                </tr>
-                </thead>
-                {% for course in courses %}
-                <tbody>
-                    <tr>
-                    <th scope="row">{{ forloop.counter }}</th>
-                    <td>{{ course.student }}</td>
-                    <td>{{ course.courseCode }}</td>
-                	{% if request.user.is_superuser %}
-                    <td>
-                    	<a data-toggle="tooltip" title="delete" href="" class="red-text"><i class="fa fa-times"></i></a>
-                    </td>
-                	{% endif %}
-                	</tr>
-                {% empty %}
-                    <tr>
-                    <td></td>
-                    <td></td>
-                    <td>
-                  	  <span>No carry over student</span>
-                    </td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+    {% if request.user.is_superuser %}
+    <!-- Heading -->
+    <h6 class="mb-2 mb-sm-0 pt-1">
+        <a class="pull-right btn btn-default btn-rounded mb-3" href="" class="btn btn-default btn-rounded mb-4">
+            <i class="fa fa-file-pdf-o" aria-hidden="true"></i> Print
+        </a>
+    </h6>
+    {% endif %}
+    <div class="table-wrapper-scroll-y">
+    	<table class="table table-bordered table-striped">
+    		<thead>
+    			<tr>
+    				<th scope="col">#</th>
+                    <th scope="col">Student</th>
+                    <th scope="col">Course</th>
+                    {% if request.user.is_superuser %}
+                    <th scope="col">Action</th>
+                    {% endif %}
                     </tr>
-                    </tbody>
-                {% endfor %}
-                 </table>
-            </div>
+                    </thead>
+                    {% for course in courses %}
+                    <tbody>
+                        <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ course.student }}</td>
+                        <td>{{ course.course }}</td>
+                    	{% if request.user.is_superuser %}
+                        <td>
+                        	<a data-toggle="tooltip" title="delete" href="" class="red-text"><i class="fa fa-times"></i></a>
+                        </td>
+                    	{% endif %}
+                    	</tr>
+                    {% empty %}
+                        <tr>
+                        <td></td>
+                        <td></td>
+                        <td>
+                      	  <span>No carry over student</span>
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        </tr>
+                        </tbody>
+                    {% endfor %}
+                     </table>
+                 </div>
+             </div>
  {% endif %}
 {% endblock %}

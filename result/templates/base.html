@@ -15,6 +15,14 @@
         <link href="{% static 'css/mdb.min.css' %}" rel="stylesheet">
         <!-- Your custom styles (optional) -->
         <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+        <link rel="apple-touch-icon" sizes="180x180" href="{% static 'icons/apple-touch-icon.png' %}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{% static 'icons/favicon-32x32.png' %}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{% static 'icons/favicon-16x16.png' %}">
+        <link rel="manifest" href="{% static 'icons/site.webmanifest' %}">
+        <link rel="mask-icon" href="{% static 'icons/safari-pinned-tab.svg' %}" color="#5bbad5">
+        <meta name="msapplication-TileColor" content="#2b5797">
+        <meta name="theme-color" content="#ffffff">
     </head>
     <body class="grey lighten-3">
 
@@ -42,15 +50,14 @@
                     <ul class="navbar-nav mr-auto"></ul>
                     <ul class="navbar-nav nav-flex-icons">
                         <li class="nav-item">
-                            {% if request.user.is_superuser %}
-                            <a href="{% url 'manage_session' %}" class="nav-link border border-light rounded waves-effect">
-                                <i class="fa mr-3"></i>{{ current_session }}
+                            <a href="{% if request.user.is_superuser %}{% url 'manage_semester' %}{% else %}#{% endif %}" class="nav-link border border-light grey-text rounded waves-effect">
+                                <i class="fa fa-cogs mr-3"></i>{{ current_semester }} Semester
                             </a>
-                            {% else %}
-                            <a href="#" class="nav-link border border-light rounded waves-effect green-text">
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% if request.user.is_superuser %}{% url 'manage_session' %}{% else %}#{% endif %}" class="nav-link border border-light green-text rounded waves-effect">
                                 <i class="fa fa-cogs mr-3"></i>{{ current_session }}
                             </a>
-                            {% endif %}
                         </li>
                         <li class="nav-item">
                             <a href="{% url 'profile' %}" class="nav-link border border-light rounded waves-effect blue-text">

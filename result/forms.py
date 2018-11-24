@@ -68,8 +68,8 @@ class StaffAddForm(UserCreationForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.is_lecturer = True
-        user.first_name = self.cleaned_data.get('firstname')
-        user.last_name = self.cleaned_data.get('lastname')
+        user.first_name = self.cleaned_data.get('first_name')
+        user.last_name = self.cleaned_data.get('last_name')
         user.phone = self.cleaned_data.get('phone')
         user.address = self.cleaned_data.get('address')
         user.email = self.cleaned_data.get('email')
@@ -160,8 +160,8 @@ class StudentAddForm(UserCreationForm):
     def save(self):
         user = super().save(commit=False)
         user.is_student = True
-        user.first_name=self.cleaned_data.get('firstname') 
-        user.last_name=self.cleaned_data.get('lastname')
+        user.first_name=self.cleaned_data.get('first_name') 
+        user.last_name=self.cleaned_data.get('last_name')
         user.phone=self.cleaned_data.get('phone')
         user.email=self.cleaned_data.get('email')
         user.save()
@@ -277,7 +277,7 @@ class ChangePasswordForm(forms.ModelForm):
 
 class CourseAllocationForm(forms.ModelForm):
     courses = forms.ModelMultipleChoiceField(
-        queryset=Course.objects.all(),
+        queryset=Course.objects.all().order_by('level'),
         widget=forms.CheckboxSelectMultiple,
         required=True
     )
@@ -308,12 +308,12 @@ class CourseRegitsrationForm(forms.ModelForm):
 
 
 class ProfileForm(forms.ModelForm):
-    firstname = forms.CharField(
+    first_name = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         label="Firstname",
         max_length=30,
         required=False)
-    lastname = forms.CharField(
+    last_name = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         label="Lastname",
         max_length=30,
@@ -336,7 +336,7 @@ class ProfileForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['firstname', 'lastname',
+        fields = ['first_name', 'last_name',
                   'email', 'phone', 'picture']
 
 class SessionForm(forms.ModelForm):
@@ -345,6 +345,30 @@ class SessionForm(forms.ModelForm):
         fields = ['session', 'is_current_session']
 
 class SemesterForm(forms.ModelForm):
+    semester = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        label="Semester",
+        max_length=30,
+        required=False)
+    is_current_semester = forms.CharField(
+        widget=forms.Select(
+            choices = ((True, 'Yes'), (False, 'No')),
+            attrs={
+                'class': 'browser-default custom-select',
+            }
+        ),
+        label = "*Is current semester",
+    )
+    session = forms.ModelChoiceField(
+        queryset=Session.objects.all(),
+        widget=forms.Select(
+            attrs={
+                'class': 'browser-default custom-select',
+            }
+        ),
+        required=True
+    )
+    next_semester_begins = forms.DateTimeField()
     class Meta:
         model = Semester
-        fields = '__all__'
+        fields = ['semester', 'is_current_semester', 'session', 'next_semester_begins']
