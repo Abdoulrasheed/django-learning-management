@@ -128,8 +128,7 @@ def profile_update(request):
             user.last_name = form.cleaned_data.get('last_name')
             user.email = form.cleaned_data.get('email')
             user.phone = form.cleaned_data.get('phone')
-            user.picture = form.cleaned_data.get('picture')
-            print(form.cleaned_data.get('picture'))
+            user.picture = request.FILES['picture']
             user.save()
             messages.success(request, 'Your profile was successfully edited.')
             return redirect("/profile/")
