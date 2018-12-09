@@ -202,16 +202,19 @@ class TakenCourse(models.Model):
         previousResult = Result.objects.filter(student__id=self.student.id, level__lt=self.student.level)
         previousCGPA = 0
         for i in previousResult:
-            previousCGPA += i.cgpa
+            if i.cgpa is not None:
+                previousCGPA += i.cgpa
         cgpa = 0
         if str(current_semester) == SECOND:
             try:
                 first_sem_gpa = Result.objects.get(student=self.student.id, semester=FIRST, level=self.student.level) 
+                first_sem_gpa += first_sem_gpa.gpa.gpa
             except:
                 first_sem_gpa = 0
 
             try:
                 sec_sem_gpa = Result.objects.get(student=self.student.id, semester=SECOND, level=self.student.level) 
+                sec_sem_gpa += sec_sem_gpa.gpa
             except:
                 sec_sem_gpa = 0
 
@@ -219,7 +222,8 @@ class TakenCourse(models.Model):
             TCU = 0
             for i in taken_courses:
                 TCU += int(i.course.courseUnit)
-            cgpa = first_sem_gpa.gpa + sec_sem_gpa.gpa / TCU
+            cpga = first_sem_gpa + sec_sem_gpa / TCU
+            
             return round(cgpa, 2)
 
 

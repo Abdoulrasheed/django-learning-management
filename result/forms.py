@@ -160,8 +160,8 @@ class StudentAddForm(UserCreationForm):
     def save(self):
         user = super().save(commit=False)
         user.is_student = True
-        user.first_name=self.cleaned_data.get('first_name') 
-        user.last_name=self.cleaned_data.get('last_name')
+        user.first_name=self.cleaned_data.get('firstname') 
+        user.last_name=self.cleaned_data.get('lastname')
         user.phone=self.cleaned_data.get('phone')
         user.email=self.cleaned_data.get('email')
         user.save()

@@ -344,15 +344,15 @@ class StudentAddView(CreateView):
 @login_required
 @lecturer_required
 def edit_student(request, pk):
-    student = get_object_or_404(Student, pk=pk)
-    if request.method == "POST":
-        form = StudentAddForm(request.POST, instance=student)
-        if form.is_valid():
-            form.save()
-            return redirect('student_list')
-    else:
-        form = StudentAddForm(instance=student)
-    return render(request, 'registration/edit_student.html', {'form': form})
+	student = get_object_or_404(Student, pk=pk)
+	if request.method == "POST":
+		form = StudentAddForm(request.POST, instance=student)
+		if form.is_valid():
+			form.save()
+			return redirect('student_list')
+	else:
+		form = StudentAddForm(instance=student)
+	return render(request, 'registration/edit_student.html', {'form': form})
 
 @login_required
 @lecturer_required

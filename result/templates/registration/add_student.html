@@ -29,7 +29,7 @@
         <i class="fa fa-user prefix"></i>
                                    {{ form.username }}
         <label for="inputEmail4MD">{{ form.username.label }}</label>
-        {{ form.username.errors }}
+        <span style="color: red"> {{ form.username.errors }} </span>
       </div>
     </div>
     <!-- Grid column -->
@@ -41,7 +41,7 @@
         <i class="fa fa-lock prefix"></i>
         {{ form.password1 }}
         <label for="inputPassword4MD">{{ form.password1.label }}</label>
-        {{ form.password1.errors }}
+        <span style="color: red">{{ form.password1.errors }}</span>
       </div>
     </div>
     <!-- Grid column -->
@@ -53,7 +53,7 @@
         <i class="fa fa-lock prefix"></i>
         {{ form.password2 }}
         <label for="inputPassword4MD">{{ form.password1.label }}</label>
-        {{ form.password2.errors }}
+        <span style="color: red">{{ form.password2.errors }}</span>
       </div>
     </div>
     <!-- Grid column -->
@@ -67,7 +67,7 @@
         <i class="fa fa-dot-circle-o prefix"></i>
        {{ form.firstname }}
         <label for="inputCityMD">{{ form.firstname.label }}</label>
-        {{ form.firstname.errors }}
+        <span style="color: red">{{ form.firstname.errors }}</span>
       </div>
     </div>
     <!-- Grid column -->
@@ -79,7 +79,7 @@
         <i class="fa fa-dot-circle-o prefix"></i>
         {{ form.lastname }}
         <label for="inputZipMD">{{ form.lastname.label }}</label>
-        {{ form.lastname.errors }}
+        <span style="color: red">{{ form.lastname.errors }}</span>
       </div>
     </div>
 
@@ -89,7 +89,7 @@
         <i class="fa fa-envelope prefix"></i>
         {{ form.email }}
         <label for="student_email">{{ form.email.label }}</label>
-        {{ form.email.errors }}
+        <span style="color: red">{{ form.email.errors }}</span>
       </div>
     </div>
     <!-- Grid column -->
@@ -103,7 +103,7 @@
         <i class="fa fa-home prefix"></i>
         {{ form.address }}
         <label for="student_address">{{ form.address.label }}</label>
-        {{ form.address.errors }}
+        <span style="color: red">{{ form.address.errors }}</span>
       </div>
     </div>
   </div>
@@ -116,7 +116,7 @@
         <i class="fa fa-phone prefix"></i>
        {{ form.phone }}
         <label for="inputCityMD">{{ form.phone.label }}</label>
-        {{ form.phone.errors }}
+        <span style="color: red">{{ form.phone.errors }}</span>
       </div>
     </div>
 
@@ -128,6 +128,7 @@
       <div class="md-form form-group">
         <i class="fa fa-dot-bar prefix"></i>
        {{ form.level }}
+       <span style="color: red">{{ form.level.errors }}</span>
       </div>
     </div>
   </div>
