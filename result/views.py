@@ -581,6 +581,8 @@ def view_result(request):
                 a = Result.objects.get(student__user__pk=request.user.id, level=previousLEVEL, semester="Second")
                 previousCGPA = a.cgpa
                 break
+            except:
+                previousCGPA = 0
         else:
             break
     context = {
