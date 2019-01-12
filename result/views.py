@@ -15,7 +15,7 @@ from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
 
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, black
 from reportlab.lib.units import inch
 
 
@@ -667,12 +667,22 @@ def result_sheet_pdf_view(request, id):
     current_semester = Semester.objects.get(is_current_semester=True)
     current_session = Session.objects.get(is_current_session=True)
     result = TakenCourse.objects.filter(course__pk=id)
+    # TOBE USED, fname = str(current_semester) + '_semester_' + str(current_session) + '_session_' + 'result sheet.pdf'
     doc = SimpleDocTemplate("/tmp/somefilename.pdf")
     styles = getSampleStyleSheet()
     Story = [Spacer(1,2)]
     style = styles["Normal"]
+    title = "\t\t\t" + str(current_semester) + " Semester " + str(current_session) + " Result Sheet"
+    p = Paragraph(title, style)
+    Story.append(p)
+    Story.append(Spacer(1,1*inch))
+
+    header = "ID Number  CA  Exam  Grade Comment"
+    p = Paragraph(header, style)
+    Story.append(p)
+    Story.append(Spacer(1,0.3*inch))
     for student in result:
-       bogustext = "ID Number: {0}\t\t CA: {1}\t\t Exam: {2}\t\t Grade: {3}\t\tComment: {4}".format(student.student.id_number, int(student.ca), int(student.exam), student.grade, student.comment)
+       bogustext = "{0} {1} {2} {3} {4}".format(student.student.id_number, int(student.ca), int(student.exam), student.grade, student.comment)
        p = Paragraph(bogustext, style)
        Story.append(p)
        Story.append(Spacer(1,0.2*inch))
