@@ -577,9 +577,10 @@ def view_result(request):
     for i in result:
         if not int(i.level) - 100 == 0: # TODO think n check the logic
             previousLEVEL = i.level
-            a = Result.objects.get(student__user__pk=request.user.id, level=previousLEVEL, semester="Second")
-            previousCGPA = a.cgpa
-            break
+            try:
+                a = Result.objects.get(student__user__pk=request.user.id, level=previousLEVEL, semester="Second")
+                previousCGPA = a.cgpa
+                break
         else:
             break
     context = {
