@@ -329,6 +329,12 @@ class ProfileForm(forms.ModelForm):
         max_length=16,
         required=False)
 
+    address = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        label="Home Address",
+        max_length=200,
+        required=False)
+
     picture = forms.ImageField(
         widget=forms.FileInput(attrs={'class': 'form-control'}),
         label="Upload picture",
@@ -337,7 +343,7 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name',
-                  'email', 'phone', 'picture']
+                  'email', 'phone', 'address', 'picture']
 
 class SessionForm(forms.ModelForm):
     class Meta:

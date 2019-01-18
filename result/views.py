@@ -135,7 +135,9 @@ def profile_update(request):
             user.last_name = form.cleaned_data.get('last_name')
             user.email = form.cleaned_data.get('email')
             user.phone = form.cleaned_data.get('phone')
-            user.picture = request.FILES['picture']
+            user.address = form.cleaned_data.get('address')
+            if request.FILES:
+                user.picture = request.FILES['picture']
             user.save()
             messages.success(request, 'Your profile was successfully edited.')
             return redirect("/profile/")
@@ -439,7 +441,7 @@ class CourseAllocationView(CreateView):
             a = CourseAllocation.objects.create(lecturer=lecturer)
         for i in range(0, selected_courses.count()):
             a.courses.add(courses[i])
-        a.save()
+            a.save()
         return redirect('course_allocation_view')
 
 
@@ -816,113 +818,229 @@ def result_sheet_pdf_view(request, id):
         return response
     return response
 
+
+@login_required
+@student_required
 def course_registration_form(request):
-	current_semester = Semester.objects.get(is_current_semester=True)
-	current_session = Session.objects.get(is_current_session=True)
-	courses = TakenCourse.objects.filter(student__pk=request.user.id)
-	fname = request.user.username + '.pdf'
-	fname = fname.replace("/", "-")
-	flocation = '/tmp/'+fname
-	doc = SimpleDocTemplate(flocation, rightMargin=50, leftMargin=20 * cm, topMargin=0.3 * cm, bottomMargin=0)
-	styles = getSampleStyleSheet()
-	styles.add(ParagraphStyle( name="ParagraphTitle", fontSize=11, fontName="FreeSansBold"))
-	Story = [Spacer(1,0.5)]
-	Story.append(Spacer(1,0.4*inch))
-	style = styles["Normal"]
+    current_semester = Semester.objects.get(is_current_semester=True)
+    current_session = Session.objects.get(is_current_session=True)
+    courses = TakenCourse.objects.filter(student__user__id=request.user.id)
+    fname = request.user.username + '.pdf'
+    fname = fname.replace("/", "-")
+    flocation = '/tmp/'+fname
+    doc = SimpleDocTemplate(flocation, rightMargin=15, leftMargin=15, topMargin=0, bottomMargin=0)
+    styles = getSampleStyleSheet()
 
-	style = getSampleStyleSheet()
-	normal = style["Normal"]
-	normal.alignment = TA_CENTER
-	normal.fontName = "Helvetica"
-	normal.fontSize = 12
-	normal.leading = 15
-	title = "<b>MODIBBO ADAMA UNIVERSITY OF TECHNOLOGY, YOLA</b>" 
-	title = Paragraph(title.upper(), normal)
-	Story.append(title)
-	Story.append(Spacer(1,0.1*inch))
-	style = getSampleStyleSheet()
+    Story = [Spacer(1,0.5)]
+    Story.append(Spacer(1,0.4*inch))
+    style = styles["Normal"]
 
-	title = "<b>SCHOOL OF MANAGEMENT AND INFORMATION TECHNOLOGY</b>"
-	title = Paragraph(title.upper(), normal)
-	Story.append(title)
-	
-	Story.append(Spacer(1,0.1*inch))
-	
+    style = getSampleStyleSheet()
+    normal = style["Normal"]
+    normal.alignment = TA_CENTER
+    normal.fontName = "Helvetica"
+    normal.fontSize = 12
+    normal.leading = 18
+    title = "<b>MODIBBO ADAMA UNIVERSITY OF TECHNOLOGY, YOLA</b>" 
+    title = Paragraph(title.upper(), normal)
+    Story.append(title)
+    style = getSampleStyleSheet()
+    
+    school = style["Normal"]
+    school.alignment = TA_CENTER
+    school.fontName = "Helvetica"
+    school.fontSize = 10
+    school.leading = 18
+    school_title = "<b>SCHOOL OF MANAGEMENT AND INFORMATION TECHNOLOGY</b>"
+    school_title = Paragraph(school_title.upper(), school)
+    Story.append(school_title)
 
-	title = "<b>DEPARTMENT OF INFORMATION MANAGEMENT TECHNOLOGY</b>"
-	title = Paragraph(title.upper(), normal)
-	Story.append(title)
-	Story.append(Spacer(1,.3*inch))
+    style = getSampleStyleSheet()
+    Story.append(Spacer(1,0.1*inch))
+    department = style["Normal"]
+    department.alignment = TA_CENTER
+    department.fontName = "Helvetica"
+    department.fontSize = 9
+    department.leading = 18
+    department_title = "<b>DEPARTMENT OF INFORMATION MANAGEMENT TECHNOLOGY</b>"
+    department_title = Paragraph(department_title, department)
+    Story.append(department_title)
+    Story.append(Spacer(1,.3*inch))
+    
+    title = "<b><u>STUDENT REGISTRATION FORM</u></b>"
+    title = Paragraph(title.upper(), normal)
+    Story.append(title)
+    student = Student.objects.get(user__pk=request.user.id)
 
+    style_right = ParagraphStyle(name='right', parent=styles['Normal'])
+    tbl_data = [
+        [Paragraph("<b>Registration Number : " + request.user.username.upper() + "</b>", styles["Normal"])],
+        [Paragraph("<b>Name : " + request.user.get_full_name().upper() + "</b>", styles["Normal"])],
+        [Paragraph("<b>Session : " + current_session.session.upper() + "</b>", styles["Normal"]), Paragraph("<b>Level: " + student.level + "</b>", styles["Normal"])
+        ]]
+    tbl = Table(tbl_data)
+    Story.append(tbl)
+    Story.append(Spacer(1, 0.6*inch))
 
-	title = "<b><u>STUDENT REGISTRATION FORM</u></b>"
-	title = Paragraph(title.upper(), normal)
-	Story.append(title)
-	Story.append(Spacer(1,.6*inch))
+    style = getSampleStyleSheet()
+    semester = style["Normal"]
+    semester.alignment = TA_LEFT
+    semester.fontName = "Helvetica"
+    semester.fontSize = 9
+    semester.leading = 18
+    semester_title = "<b>FIRST SEMESTER</b>"
+    semester_title = Paragraph(semester_title, semester)
+    Story.append(semester_title)
 
-	student = Student.objects.get(user__pk=request.user.id)
+    elements = []
 
-	style_right = ParagraphStyle(name='right', parent=styles['Normal'], alignment=TA_LEFT)
-	tbl_data = [
-		[Paragraph("<b>Registration Number: " + request.user.username.upper() + "</b>", styles["Normal"])],
-		[Paragraph("<b>Name: " + request.user.get_full_name().upper() + "</b>", styles["Normal"])],
-		[Paragraph("<b>Session: " + current_session.session.upper() + "</b>", styles["Normal"]), Paragraph("<b>Level: " + student.level + "</b>", styles["Normal"])
-		]]
-	tbl = Table(tbl_data)
-	Story.append(tbl)
-	Story.append(Spacer(1, 0.6*inch))
+    # FIRST SEMESTER
+    count = 0
+    header = [('S/No', 'Course Code', 'Course Title', 'Unit', Paragraph('Name, Siganture of course lecturer & Date', style['Normal']))]
+    table_header = Table(header,1*[1.4*inch], 1*[0.5*inch])
+    table_header.setStyle(
+        TableStyle([
+                ('ALIGN',(-2,-2), (-2,-2),'CENTER'),
+                ('VALIGN',(-2,-2), (-2,-2),'MIDDLE'),
+                ('ALIGN',(1,0), (1,0),'CENTER'),
+                ('VALIGN',(1,0), (1,0),'MIDDLE'),
+                ('ALIGN',(0,0), (0,0),'CENTER'),
+                ('VALIGN',(0,0), (0,0),'MIDDLE'),
+                ('ALIGN',(-4,0), (-4,0),'LEFT'),
+                ('VALIGN',(-4,0), (-4,0),'MIDDLE'),
+                ('ALIGN',(-3,0), (-3,0),'LEFT'),
+                ('VALIGN',(-3,0), (-3,0),'MIDDLE'),
+                ('TEXTCOLOR',(0,-1),(-1,-1),colors.black),
+                ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+                ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ]))
+    Story.append(table_header)
 
-	logo = MEDIA_ROOT + "/logo/android-chrome-144x144.png"
-	im = Image(logo, 1.5*inch, 1.5*inch)
-	im.__setattr__("_offs_x", -238)
-	im.__setattr__("_offs_y", 260)
-	Story.append(im)
+    first_semester_unit = 0
+    for course in courses:
+        if course.course.semester == FIRST:
+            first_semester_unit += int(course.course.courseUnit)
+            data = [(count+1, course.course.courseCode.upper(), course.course.courseTitle, course.course.courseUnit, '')]
+            color = colors.black
+            count += 1
+            table_body=Table(data,1*[1.4*inch], 1*[0.3*inch])
+            table_body.setStyle(
+                TableStyle([
+                    ('ALIGN',(-2,-2), (-2,-2),'CENTER'),
+                    ('ALIGN',(1,0), (1,0),'CENTER'),
+                    ('ALIGN',(0,0), (0,0),'CENTER'),
+                    ('ALIGN',(-4,0), (-4,0),'LEFT'),
+                    ('TEXTCOLOR',(0,-1),(-1,-1),colors.black),
+                    ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+                    ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+                    ]))
+            Story.append(table_body)
 
-	picture =  BASE_DIR + "/result/" + request.user.get_picture()
-	im = Image(picture, 1.0*inch, 1.0*inch)
-	im.__setattr__("_offs_x", 238)
-	im.__setattr__("_offs_y", 220)
-	Story.append(im)
+    style = getSampleStyleSheet()
+    semester = style["Normal"]
+    semester.alignment = TA_LEFT
+    semester.fontName = "Helvetica"
+    semester.fontSize = 8
+    semester.leading = 18
+    semester_title = "<b>Total Units : " + str(first_semester_unit) + "</b>"
+    semester_title = Paragraph(semester_title, semester)
+    Story.append(semester_title)
 
-	elements = []
-	count = 0
-	header = [('S/No', 'Course Code', 'Course Title', 'Unit', Paragraph('Name, Siganture of course lecturer & Date', style['Normal']))]
-	table_header=Table(header,1*[1.4*inch], 1*[0.5*inch])
-	table_header.setStyle(
-		TableStyle([
-			('ALIGN',(-2,-2), (-2,-2),'CENTER'),
-			('TEXTCOLOR',(1,0),(1,0),colors.blue),
-			('TEXTCOLOR',(-1,0),(-1,0),colors.blue),
-			('ALIGN',(0,-1),(-1,-1),'CENTER'),
-			('VALIGN',(0,-1),(-1,-1),'MIDDLE'),
-			('TEXTCOLOR',(0,-1),(-1,-1),colors.blue),
-			('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
-			('BOX', (0,0), (-1,-1), 0.25, colors.black),
-			]))
-	Story.append(table_header)
-	for course in courses:
-		data = [(count+1, course.courseCode.upper(), course.courseTitle, course.courseUnit)]
-		color = colors.black
-		count += 1
-		t=Table(data, 5*[2*inch], 5*[2*inch])
-		t.setStyle(
-			TableStyle([
-				('ALIGN',(-2,-2), (-2,-2),'CENTER'),
-				('ALIGN',(1,0), (1,0),'CENTER'),
-				('ALIGN',(-1,0), (-1,0),'CENTER'),
-				('ALIGN',(-3,0), (-3,0),'CENTER'),
-				('ALIGN',(-4,0), (-4,0),'CENTER'),
-				('ALIGN',(-6,0), (-6,0),'CENTER'),
-				('TEXTCOLOR',(0,-1),(-1,-1),color),
-				('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
-				('BOX', (0,0), (-1,-1), 0.25, colors.black),
-				]))
-		Story.append(t)
+    # FIRST SEMESTER ENDS HERE
+    Story.append(Spacer(1, 0.6*inch))
 
-	doc.build(Story)
-	fs = FileSystemStorage("/tmp")
-	with fs.open(fname) as pdf:
-		response = HttpResponse(pdf, content_type='application/pdf')
-		response['Content-Disposition'] = 'inline; filename='+fname+''
-		return response
-	return response
+    style = getSampleStyleSheet()
+    semester = style["Normal"]
+    semester.alignment = TA_LEFT
+    semester.fontName = "Helvetica"
+    semester.fontSize = 9
+    semester.leading = 18
+    semester_title = "<b>SECOND SEMESTER</b>"
+    semester_title = Paragraph(semester_title, semester)
+    Story.append(semester_title)
+    # SECOND SEMESTER
+    count = 0
+    header = [('S/No', 'Course Code', 'Course Title', 'Unit', Paragraph('<b>Name, Siganture of course lecturer & Date</b>', style['Normal']))]
+    table_header = Table(header,1*[1.4*inch], 1*[0.5*inch])
+    table_header.setStyle(
+        TableStyle([
+                ('ALIGN',(-2,-2), (-2,-2),'CENTER'),
+                ('VALIGN',(-2,-2), (-2,-2),'MIDDLE'),
+                ('ALIGN',(1,0), (1,0),'CENTER'),
+                ('VALIGN',(1,0), (1,0),'MIDDLE'),
+                ('ALIGN',(0,0), (0,0),'CENTER'),
+                ('VALIGN',(0,0), (0,0),'MIDDLE'),
+                ('ALIGN',(-4,0), (-4,0),'LEFT'),
+                ('VALIGN',(-4,0), (-4,0),'MIDDLE'),
+                ('ALIGN',(-3,0), (-3,0),'LEFT'),
+                ('VALIGN',(-3,0), (-3,0),'MIDDLE'),
+                ('TEXTCOLOR',(0,-1),(-1,-1),colors.black),
+                ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+                ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ]))
+    Story.append(table_header)
+
+    second_semester_unit = 0
+    for course in courses:
+        if course.course.semester == SECOND:
+            second_semester_unit += int(course.course.courseUnit)
+            data = [(count+1, course.course.courseCode.upper(), course.course.courseTitle, course.course.courseUnit, '')]
+            color = colors.black
+            count += 1
+            table_body=Table(data,1*[1.4*inch], 1*[0.3*inch])
+            table_body.setStyle(
+                TableStyle([
+                    ('ALIGN',(-2,-2), (-2,-2),'CENTER'),
+                    ('ALIGN',(1,0), (1,0),'CENTER'),
+                    ('ALIGN',(0,0), (0,0),'CENTER'),
+                    ('ALIGN',(-4,0), (-4,0),'LEFT'),
+                    ('TEXTCOLOR',(0,-1),(-1,-1),colors.black),
+                    ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+                    ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+                    ]))
+            Story.append(table_body)
+
+    style = getSampleStyleSheet()
+    semester = style["Normal"]
+    semester.alignment = TA_LEFT
+    semester.fontName = "Helvetica"
+    semester.fontSize = 8
+    semester.leading = 18
+    semester_title = "<b>Total Units : " + str(second_semester_unit) + "</b>"
+    semester_title = Paragraph(semester_title, semester)
+    Story.append(semester_title)
+
+    Story.append(Spacer(1, 2))
+    style = getSampleStyleSheet()
+    certification = style["Normal"]
+    certification.alignment = TA_JUSTIFY
+    certification.fontName = "Helvetica"
+    certification.fontSize = 8
+    certification.leading = 18
+    student = Student.objects.get(user__pk=request.user.id)
+    certification_text = "CERTIFICATION OF REGISTRATION: I certify that <b>" + str(request.user.get_full_name().upper()) + "</b>\
+    has been duly registered for the <b>" + student.level + " level </b> of study in the department\
+    of INFORMATION MANAGEMENT TECHNOLOGY and that the courses and units registered are as approved by the senate of the University"
+    certification_text = Paragraph(certification_text, certification)
+    Story.append(certification_text)
+
+    # FIRST SEMESTER ENDS HERE
+
+    logo = MEDIA_ROOT + "/logo/android-chrome-144x144.png"
+    im = Image(logo, 1.5*inch, 1.5*inch)
+    im.__setattr__("_offs_x", -228)
+    im.__setattr__("_offs_y", 625)
+    Story.append(im)
+
+    picture =  BASE_DIR + request.user.get_picture()
+    im = Image(picture, 1.0*inch, 1.0*inch)
+    im.__setattr__("_offs_x", 218)
+    im.__setattr__("_offs_y", 625)
+    Story.append(im)
+    doc.build(Story)
+    fs = FileSystemStorage("/tmp")
+    with fs.open(fname) as pdf:
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = 'inline; filename='+fname+''
+        return response
+    return response

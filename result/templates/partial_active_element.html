@@ -71,9 +71,13 @@
     {% if request.user.is_student %}
     <a href="{% url 'view_results' %}" class="list-group-item 
         {% if active == 'view_results' %} active {% endif %} waves-effect">
-        <i class="fa fa-pencil-square mr-3" aria-hidden="true"></i>     
+        <i class="fa fa-eye mr-3" aria-hidden="true"></i>     
              View Result</a>
     {% endif %}
+
+    <a href="{% url 'change_password' %}" class="list-group-item 
+        {% if active == 'change_password' %} active {% endif %} waves-effect">
+    <i class="fa  fa-key mr-3" aria-hidden="true"></i>Update Password</a>
 
     {% if request.user.is_superuser %}
     <a href="{% url 'manage_session' %}" class="list-group-item 
@@ -86,7 +90,15 @@
         {% if active == 'manage_semester' %} active {% endif %} waves-effect">
         <i class="fa  fa-gear mr-3" aria-hidden="true"></i>Semester Setting</a>
     {% endif %}
-    <a href="{% url 'change_password' %}" class="list-group-item 
-        {% if active == 'change_password' %} active {% endif %} waves-effect">
-    <i class="fa  fa-key mr-3" aria-hidden="true"></i>Update Password</a>
+
+    {% if request.user.is_student %}
+    <a href="#" class="list-group-item 
+        {% if active == 'payment' %} active {% endif %} waves-effect">
+        <i class="fa  fa-cc-mastercard mr-3" aria-hidden="true"></i>Pay Departmental</a>
+    {% endif %}
+    {% if request.user.is_superuser %}
+    <a href="#" class="list-group-item 
+        {% if active == 'system_setting' %} active {% endif %} waves-effect">
+        <i class="fa  fa-gear mr-3" aria-hidden="true"></i>System setting</a>
+    {% endif %}
 </div>

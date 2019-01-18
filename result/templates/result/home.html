@@ -129,7 +129,7 @@
                     <!--Card-->
                     
                     <div class="card">
-                        <a href="{% url 'student_list' %}">
+                        <a href="{% if not request.user.is_student %}{% url 'student_list' %}{% else %} # {% endif %}">
                         <!-- Card header -->
                         <div class="card-header waves-effect">Student{{ no_of_students|pluralize }}</div>
 
@@ -154,7 +154,7 @@
 
                     <!--Card-->
                     <div class="card">
-                        <a href="{% url 'staff_list' %}">
+                        <a href="{% if not request.user.is_student %}{% url 'staff_list' %}{% else %} # {% endif %}">
                         <!-- Card header -->
                         <div class="card-header waves-effect">Staff{{ no_of_staff|pluralize }}</div>
 

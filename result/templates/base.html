@@ -78,9 +78,16 @@
         </nav>
         <!-- Navbar -->
         <!-- Sidebar -->
+        <style type="text/css">
+            .dashboard {
+                display: block; 
+                max-height: 500px; 
+                overflow-y: auto; 
+                -ms-overflow-style: 
+                -ms-autohiding-scrollbar;
+        }
+        </style>
         <div class="sidebar-fixed position-fixed">
-
-            
                 <p style="margin-left: 30px;" id="icon" class="logo"> ARMS </p> 
                 {% if request.user.is_lecturer %}
                 <p><i class="fa fa-hand-o-right" aria-hidden="true"></i>
@@ -92,10 +99,11 @@
                 <p><i class="fa fa-hand-o-right" aria-hidden="true"></i>
                     <span class="teal-text text-center"> Superuser</span></p>
                 {% endif %}
-            
+            <div class="dashboard">
             {% block side_bar %}
                 {% include 'partial_active_element.html' with active='Dashboard' %}
             {% endblock side_bar %}
+            </div>
 
         </div>
         <!-- Sidebar -->
