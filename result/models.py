@@ -228,11 +228,12 @@ class TakenCourse(models.Model):
 
 
 class CourseAllocation(models.Model):
-	lecturer = models.ForeignKey(User, on_delete=models.CASCADE)
-	courses = models.ManyToManyField(Course, related_name='allocated_course')
+    lecturer = models.ForeignKey(User, on_delete=models.CASCADE)
+    courses = models.ManyToManyField(Course, related_name='allocated_course')
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, blank=True)
 
-	def __str__(self):
-		return self.lecturer.username
+    def __str__(self):
+        return self.lecturer.username
 
 class CarryOverStudent(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)

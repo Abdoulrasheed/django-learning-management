@@ -38,5 +38,6 @@ urlpatterns = [
 	path('students/repeat-list/', views.repeat_list, name='repeat_list'),
 	path('students/1st_class_list/', views.first_class_list, name='first_class_list'),
 	path('result/print/<int:id>/', views.result_sheet_pdf_view, name='result_sheet_pdf_view'),
+	path('registration/form/', views.course_registration_form, name='course_registration_form'),
 	path('api/data/', views.get_chart, name='chart'),
 ]

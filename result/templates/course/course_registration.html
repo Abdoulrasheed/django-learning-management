@@ -18,6 +18,7 @@
     {% endblock js %}
 <div class="container-fluid mt-5">
 	<!-- Table with panel -->
+  {% if not all_courses_are_registered %}
 <form method="POST" action="{% url 'course_registration' %}">{% csrf_token %}
   {% for message in messages %}
   <div style="background-color: lightblue" class="alert {{ message.tags }} alert-dismissible" role="alert">
@@ -107,11 +108,11 @@
             <th scope="row">
              
             </th>
-            <td>Selected Unit(s): <a id="units"></a></td>
             <td></td>
             <td></td>
             <td></td>
-            <td><b>Total unit(s):</b>  {{ total_first_semester_unit }} </td>
+            <td></td>
+            <td><b>First semester unit(s):</b>  {{ total_first_semester_unit }} </td>
           </tr>
         </tbody>
         <!--Table body-->
@@ -187,7 +188,17 @@
             <td></td>
             <td></td>
             <td></td>
-            <td><b>Total unit(s):</b>  {{ total_sec_semester_unit }} </td>
+            <td><b>Second semester unit(s):</b>  {{ total_sec_semester_unit }} </td>
+          </tr>
+          <tr>
+            <th scope="row">
+             
+            </th>
+            <td><b>Selected Unit(s): <a id="units">{{ total_registered_unit }}</a></b></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td><b>Total unit(s):</b>  {{ total_sec_semester_unit|add:total_first_semester_unit }} </td>
           </tr>
         </tbody>
         <!--Table body-->
@@ -197,9 +208,10 @@
   </div>
 </div>
 </form>
+{% endif %}
 <br>
 <br>
-
+{% if not no_course_is_registered %}
 <form method="POST" action="{% url 'course_drop' %}">{% csrf_token %}
 <div class="card card-cascade narrower">
 
@@ -215,9 +227,9 @@
     <a href="" class="white-text mx-3">Registered Courses</a>
 
     <div>
-      <button type="button" class="btn btn-outline-white btn-rounded btn-sm px-2">
+    <a target="_blank" href="{% url 'course_registration_form' %}" class="btn btn-outline-white btn-rounded btn-sm px-2">
         <i class="fa fa-file-pdf-o" aria-hidden="true"></i> Print Registration Form
-      </button>
+      </a>
     </div>
 
   </div>
@@ -300,6 +312,7 @@
   </div>
 </div>
 </form>
+{% endif %}
 <br>
 <br>
 </div>

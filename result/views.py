@@ -14,9 +14,16 @@ from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
 
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet, black
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+from reportlab.lib.styles import getSampleStyleSheet, black, ParagraphStyle
+from reportlab.lib.enums import TA_JUSTIFY,TA_LEFT,TA_CENTER,TA_RIGHT
+from reportlab.platypus.tables import Table
 from reportlab.lib.units import inch
+from reportlab.lib import colors
+cm = 2.54
+
+from ARMS.settings import MEDIA_ROOT, BASE_DIR, STATIC_URL
+import os
 
 
 
@@ -206,7 +213,6 @@ def session_update_view(request, pk):
     session = Session.objects.get(pk=pk)
     if request.method == 'POST':
         a = request.POST.get('is_current_session')
-        print(a)
         if a == '2':
             unset = Session.objects.get(is_current_session=True)
             unset.is_current_session = False
@@ -223,15 +229,18 @@ def session_update_view(request, pk):
 
     else:
         form = SessionForm(instance=session)
-    messages.success(request, 'Updated successfully!')
     return render(request, 'result/session_update.html', {'form': form})
 
 @login_required
 @lecturer_required
 def session_delete_view(request, pk):
-    semester = get_object_or_404(Semester, pk=pk)
-    semester.delete()
-    messages.success(request, 'Deleted successfully!')
+    session = get_object_or_404(Session, pk=pk)
+    if session.is_current_session == True:
+    	messages.info(request, "You cannot delete current session")
+    	return redirect('manage_session')
+    else:
+    	session.delete()
+    	messages.success(request, "Session successfully deleted")
     return redirect('manage_semester')
 
 @login_required
@@ -246,12 +255,20 @@ def semester_add_view(request):
     if request.method == 'POST':
         form = SemesterForm(request.POST)
         if form.is_valid():
-            data = form.data.get('is_current_semester') # returns string of 2 if the user selected yes
-            if data == '2':
-                semester = Semester.objects.get(is_current_semester=True)
-                semester.is_current_semester = False
-                semester.save()
-                form.save()
+            data = form.data.get('is_current_semester') # returns string of 'True' if the user selected Yes
+            if data == 'True':
+            	semester = form.data.get('semester')
+            	ss = form.data.get('session')
+            	session = Session.objects.get(pk=ss)
+            	try:
+            		if Semester.objects.get(semester=semester, session=ss):
+	            		messages.info(request, semester + " semester in " + session.session +" session already exist")
+	            		return redirect('create_new_semester')
+            	except:
+	            	semester = Semester.objects.get(is_current_semester=True)
+	            	semester.is_current_semester = False
+	            	semester.save()
+	            	form.save()
             form.save()
             messages.success(request, 'Semester added successfully ! ')
             return redirect('manage_semester')
@@ -264,21 +281,26 @@ def semester_add_view(request):
 def semester_update_view(request, pk):
     semester = Semester.objects.get(pk=pk)
     if request.method == 'POST':
-        if request.POST.get('is_current_semester') == 'True': # returns string of 'True' if the user selected yes for is current semester
-            unset = Semester.objects.get(is_current_semester=True)
-            unset.is_current_semester = False
-            print(unset)
-            unset.save()
+        if request.POST.get('is_current_semester') == 'True': # returns string of 'True' if the user selected yes for 'is current semester'
+            unset_semester = Semester.objects.get(is_current_semester=True)
+            unset_semester.is_current_semester = False
+            unset_semester.save()
+            unset_session = Session.objects.get(is_current_session=True)
+            unset_session.is_current_session = False
+            unset_session.save()
+            new_session = request.POST.get('session')
             form = SemesterForm(request.POST, instance=semester)
             if form.is_valid():
-                form.save()
-                messages.success(request, 'Semester updated successfully !')
-                return redirect('manage_semester')
+            	set_session = Session.objects.get(pk=new_session)
+            	set_session.is_current_session = True
+            	set_session.save()
+            	form.save()
+            	messages.success(request, 'Semester updated successfully !')
+            	return redirect('manage_semester')
         else:
             form = SemesterForm(request.POST, instance=semester)
             if form.is_valid():
                 form.save()
-                messages.success(request, 'Semester updated successfully ! ')
                 return redirect('manage_semester')
 
     else:
@@ -289,7 +311,12 @@ def semester_update_view(request, pk):
 @lecturer_required
 def semester_delete_view(request, pk):
     semester = get_object_or_404(Semester, pk=pk)
-    semester.delete()
+    if semester.is_current_semester == True:
+    	messages.info(request, "You cannot delete current semester")
+    	return redirect('manage_semester')
+    else:
+    	semester.delete()
+    	messages.success(request, "Semester successfully deleted")
     return redirect('manage_semester')
 
 
@@ -440,7 +467,18 @@ def course_registration(request):
             t += (i.course.pk,)
         current_semester = Semester.objects.get(is_current_semester=True)
         courses = Course.objects.filter(level=student.level).exclude(id__in=t)
+        all_courses = Course.objects.filter(level=student.level)
+
+        no_course_is_registered = False # Check if no course is registered
+        all_courses_are_registered = False
+
         registered_courses = Course.objects.filter(level=student.level).filter(id__in=t)
+        if registered_courses.count() == 0: # Check if number of registered courses is 0
+        	no_course_is_registered = True
+
+        if registered_courses.count() == all_courses.count():
+        	all_courses_are_registered = True
+
         total_first_semester_unit = 0
         total_sec_semester_unit = 0
         total_registered_unit = 0
@@ -452,6 +490,8 @@ def course_registration(request):
         for i in registered_courses:
             total_registered_unit += int(i.courseUnit)
         context = {
+        		"all_courses_are_registered": all_courses_are_registered,
+        		"no_course_is_registered": no_course_is_registered,
                 "current_semester":current_semester, 
                 "courses":courses, 
                 "total_first_semester_unit": total_first_semester_unit,
@@ -495,11 +535,12 @@ def add_score(request):
     in a specific semester and session 
 
     """
-    current_semester = Semester.objects.get(is_current_semester=True)
     current_session = Session.objects.get(is_current_session=True)
+    current_semester = get_object_or_404(Semester, is_current_semester=True, session=current_session)
+    semester = Course.objects.filter(allocated_course__lecturer__pk=request.user.id, semester=current_semester)
     courses = Course.objects.filter(allocated_course__lecturer__pk=request.user.id).filter(semester=current_semester)
     context = {
-    "courses":courses, 
+    "courses": courses,
     }
     return render(request, 'result/add_score.html', context)
 
@@ -637,7 +678,6 @@ def carry_over(request):
         course = value[0]
         session = value[1]
         courses = CarryOverStudent.objects.filter(course__courseCode=course, session=session)
-        print(courses)
         all_courses = Course.objects.all()
         sessions = Session.objects.all()
         signal_template = True
@@ -670,30 +710,219 @@ def result_sheet_pdf_view(request, id):
     current_semester = Semester.objects.get(is_current_semester=True)
     current_session = Session.objects.get(is_current_session=True)
     result = TakenCourse.objects.filter(course__pk=id)
-    # TOBE USED, fname = str(current_semester) + '_semester_' + str(current_session) + '_session_' + 'result sheet.pdf'
-    doc = SimpleDocTemplate("/tmp/somefilename.pdf")
-    styles = getSampleStyleSheet()
-    Story = [Spacer(1,2)]
-    style = styles["Normal"]
-    title = "\t\t\t" + str(current_semester) + " Semester " + str(current_session) + " Result Sheet"
-    p = Paragraph(title, style)
-    Story.append(p)
-    Story.append(Spacer(1,1*inch))
+    no_of_pass = TakenCourse.objects.filter(course__pk=id, comment="PASS").count()
+    no_of_fail = TakenCourse.objects.filter(course__pk=id, comment="FAIL").count()
+    fname = str(current_semester) + '_semester_' + str(current_session) + '_session_' + 'resultSheet.pdf'
+    fname = fname.replace("/", "-")
+    flocation = '/tmp/'+fname
 
-    header = "ID Number  CA  Exam  Grade Comment"
-    p = Paragraph(header, style)
-    Story.append(p)
-    Story.append(Spacer(1,0.3*inch))
+    doc = SimpleDocTemplate(flocation, rightMargin=0, leftMargin=6.5 * cm, topMargin=0.3 * cm, bottomMargin=0)
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle( name="ParagraphTitle", fontSize=11, fontName="FreeSansBold"))
+    Story = [Spacer(1,.2)]
+    style = styles["Normal"]
+
+    logo = MEDIA_ROOT + "/logo/android-chrome-144x144.png"
+    print(logo)
+    im = Image(logo, 1*inch, 1*inch)
+    im.__setattr__("_offs_x", -280)
+    im.__setattr__("_offs_y", -45)
+    Story.append(im)
+    
+    style = getSampleStyleSheet()
+    normal = style["Normal"]
+    normal.alignment = TA_CENTER
+    normal.fontName = "Helvetica"
+    normal.fontSize = 12
+    normal.leading = 15
+    title = "<b> "+str(current_semester) + " Semester " + str(current_session) + " Result Sheet</b>" 
+    title = Paragraph(title.upper(), normal)
+    Story.append(title)
+    Story.append(Spacer(1,0.1*inch))
+
+    style = getSampleStyleSheet()
+    normal = style["Normal"]
+    normal.alignment = TA_CENTER
+    normal.fontName = "Helvetica"
+    normal.fontSize = 10
+    normal.leading = 15
+    title = "<b>Course lecturer: " + request.user.get_full_name() + "</b>"
+    title = Paragraph(title.upper(), normal)
+    Story.append(title)
+    Story.append(Spacer(1,0.1*inch))
+
+    normal = style["Normal"]
+    normal.alignment = TA_CENTER
+    normal.fontName = "Helvetica"
+    normal.fontSize = 10
+    normal.leading = 15
+    level = result.filter(course_id=id).first()
+    title = "<b>Level: </b>" + str(level.course.level+"L")
+    title = Paragraph(title.upper(), normal)
+    Story.append(title)
+    Story.append(Spacer(1,.6*inch))
+    
+    elements = []
+    count = 0
+    header = [('S/N', 'ID NUMBER', 'CA', 'EXAM', 'GRADE', 'COMMENT')]
+    table_header=Table(header,1*[1.2*inch], 1*[0.5*inch])
+    table_header.setStyle(
+    	TableStyle([
+    		('ALIGN',(-2,-2), (-2,-2),'CENTER'),
+    		('TEXTCOLOR',(1,0),(1,0),colors.blue),
+    		('TEXTCOLOR',(-1,0),(-1,0),colors.blue),
+    		('ALIGN',(0,-1),(-1,-1),'CENTER'),
+    		('VALIGN',(0,-1),(-1,-1),'MIDDLE'),
+    		('TEXTCOLOR',(0,-1),(-1,-1),colors.blue),
+    		('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+    		('BOX', (0,0), (-1,-1), 0.25, colors.black),
+    		]))
+    Story.append(table_header)
     for student in result:
-       bogustext = "{0} {1} {2} {3} {4}".format(student.student.id_number, int(student.ca), int(student.exam), student.grade, student.comment)
-       p = Paragraph(bogustext, style)
-       Story.append(p)
-       Story.append(Spacer(1,0.2*inch))
+    	data = [(count+1, student.student.id_number.upper(), student.ca, student.exam, student.grade, student.comment)]
+    	color = colors.black
+    	if student.grade == 'F':
+    		color = colors.red
+    	count += 1
+    	t=Table(data,1*[1.2*inch], 1*[0.5*inch])
+    	t.setStyle(
+    		TableStyle([
+	    		('ALIGN',(-2,-2), (-2,-2),'CENTER'),
+	    		('ALIGN',(1,0), (1,0),'CENTER'),
+	    		('ALIGN',(-1,0), (-1,0),'CENTER'),
+	    		('ALIGN',(-3,0), (-3,0),'CENTER'),
+	    		('ALIGN',(-4,0), (-4,0),'CENTER'),
+	    		('ALIGN',(-6,0), (-6,0),'CENTER'),
+	    		('TEXTCOLOR',(0,-1),(-1,-1),color),
+	    		('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+	    		('BOX', (0,0), (-1,-1), 0.25, colors.black),
+	    		]))
+    	Story.append(t)
+
+    Story.append(Spacer(1,1*inch))
+    style_right = ParagraphStyle(name='right', parent=styles['Normal'], alignment=TA_RIGHT)
+    tbl_data = [
+    [Paragraph("<b>Date:</b>_______________________________________", styles["Normal"]), Paragraph("<b>No. of PASS:</b> " + str(no_of_pass), style_right)],
+    [Paragraph("<b>Siganture / Stamp:</b> _____________________________", styles["Normal"]), Paragraph("<b>No. of FAIL: </b>" + str(no_of_fail), style_right)]]
+    tbl = Table(tbl_data)
+    Story.append(tbl)
+
     doc.build(Story)
 
     fs = FileSystemStorage("/tmp")
-    with fs.open("somefilename.pdf") as pdf:
+    with fs.open(fname) as pdf:
         response = HttpResponse(pdf, content_type='application/pdf')
-        response['Content-Disposition'] = 'inline; filename="somefilename.pdf"'
+        response['Content-Disposition'] = 'inline; filename='+fname+''
         return response
     return response
+
+def course_registration_form(request):
+	current_semester = Semester.objects.get(is_current_semester=True)
+	current_session = Session.objects.get(is_current_session=True)
+	courses = TakenCourse.objects.filter(student__pk=request.user.id)
+	fname = request.user.username + '.pdf'
+	fname = fname.replace("/", "-")
+	flocation = '/tmp/'+fname
+	doc = SimpleDocTemplate(flocation, rightMargin=50, leftMargin=20 * cm, topMargin=0.3 * cm, bottomMargin=0)
+	styles = getSampleStyleSheet()
+	styles.add(ParagraphStyle( name="ParagraphTitle", fontSize=11, fontName="FreeSansBold"))
+	Story = [Spacer(1,0.5)]
+	Story.append(Spacer(1,0.4*inch))
+	style = styles["Normal"]
+
+	style = getSampleStyleSheet()
+	normal = style["Normal"]
+	normal.alignment = TA_CENTER
+	normal.fontName = "Helvetica"
+	normal.fontSize = 12
+	normal.leading = 15
+	title = "<b>MODIBBO ADAMA UNIVERSITY OF TECHNOLOGY, YOLA</b>" 
+	title = Paragraph(title.upper(), normal)
+	Story.append(title)
+	Story.append(Spacer(1,0.1*inch))
+	style = getSampleStyleSheet()
+
+	title = "<b>SCHOOL OF MANAGEMENT AND INFORMATION TECHNOLOGY</b>"
+	title = Paragraph(title.upper(), normal)
+	Story.append(title)
+	
+	Story.append(Spacer(1,0.1*inch))
+	
+
+	title = "<b>DEPARTMENT OF INFORMATION MANAGEMENT TECHNOLOGY</b>"
+	title = Paragraph(title.upper(), normal)
+	Story.append(title)
+	Story.append(Spacer(1,.3*inch))
+
+
+	title = "<b><u>STUDENT REGISTRATION FORM</u></b>"
+	title = Paragraph(title.upper(), normal)
+	Story.append(title)
+	Story.append(Spacer(1,.6*inch))
+
+	student = Student.objects.get(user__pk=request.user.id)
+
+	style_right = ParagraphStyle(name='right', parent=styles['Normal'], alignment=TA_LEFT)
+	tbl_data = [
+		[Paragraph("<b>Registration Number: " + request.user.username.upper() + "</b>", styles["Normal"])],
+		[Paragraph("<b>Name: " + request.user.get_full_name().upper() + "</b>", styles["Normal"])],
+		[Paragraph("<b>Session: " + current_session.session.upper() + "</b>", styles["Normal"]), Paragraph("<b>Level: " + student.level + "</b>", styles["Normal"])
+		]]
+	tbl = Table(tbl_data)
+	Story.append(tbl)
+	Story.append(Spacer(1, 0.6*inch))
+
+	logo = MEDIA_ROOT + "/logo/android-chrome-144x144.png"
+	im = Image(logo, 1.5*inch, 1.5*inch)
+	im.__setattr__("_offs_x", -238)
+	im.__setattr__("_offs_y", 260)
+	Story.append(im)
+
+	picture =  BASE_DIR + "/result/" + request.user.get_picture()
+	im = Image(picture, 1.0*inch, 1.0*inch)
+	im.__setattr__("_offs_x", 238)
+	im.__setattr__("_offs_y", 220)
+	Story.append(im)
+
+	elements = []
+	count = 0
+	header = [('S/No', 'Course Code', 'Course Title', 'Unit', Paragraph('Name, Siganture of course lecturer & Date', style['Normal']))]
+	table_header=Table(header,1*[1.4*inch], 1*[0.5*inch])
+	table_header.setStyle(
+		TableStyle([
+			('ALIGN',(-2,-2), (-2,-2),'CENTER'),
+			('TEXTCOLOR',(1,0),(1,0),colors.blue),
+			('TEXTCOLOR',(-1,0),(-1,0),colors.blue),
+			('ALIGN',(0,-1),(-1,-1),'CENTER'),
+			('VALIGN',(0,-1),(-1,-1),'MIDDLE'),
+			('TEXTCOLOR',(0,-1),(-1,-1),colors.blue),
+			('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+			('BOX', (0,0), (-1,-1), 0.25, colors.black),
+			]))
+	Story.append(table_header)
+	for course in courses:
+		data = [(count+1, course.courseCode.upper(), course.courseTitle, course.courseUnit)]
+		color = colors.black
+		count += 1
+		t=Table(data, 5*[2*inch], 5*[2*inch])
+		t.setStyle(
+			TableStyle([
+				('ALIGN',(-2,-2), (-2,-2),'CENTER'),
+				('ALIGN',(1,0), (1,0),'CENTER'),
+				('ALIGN',(-1,0), (-1,0),'CENTER'),
+				('ALIGN',(-3,0), (-3,0),'CENTER'),
+				('ALIGN',(-4,0), (-4,0),'CENTER'),
+				('ALIGN',(-6,0), (-6,0),'CENTER'),
+				('TEXTCOLOR',(0,-1),(-1,-1),color),
+				('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+				('BOX', (0,0), (-1,-1), 0.25, colors.black),
+				]))
+		Story.append(t)
+
+	doc.build(Story)
+	fs = FileSystemStorage("/tmp")
+	with fs.open(fname) as pdf:
+		response = HttpResponse(pdf, content_type='application/pdf')
+		response['Content-Disposition'] = 'inline; filename='+fname+''
+		return response
+	return response

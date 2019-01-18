@@ -342,14 +342,18 @@ class ProfileForm(forms.ModelForm):
 class SessionForm(forms.ModelForm):
     class Meta:
         model = Session
-        fields = ['session', 'is_current_session']
+        fields = ['session']
 
 class SemesterForm(forms.ModelForm):
     semester = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        label="Semester",
-        max_length=30,
-        required=False)
+        widget=forms.Select(
+            choices = SEMESTER,
+            attrs={
+                'class': 'browser-default custom-select',
+            }
+        ),
+        label = "semester",
+    )
     is_current_semester = forms.CharField(
         widget=forms.Select(
             choices = ((True, 'Yes'), (False, 'No')),
@@ -357,7 +361,7 @@ class SemesterForm(forms.ModelForm):
                 'class': 'browser-default custom-select',
             }
         ),
-        label = "*Is current semester",
+        label = "is current semester ?",
     )
     session = forms.ModelChoiceField(
         queryset=Session.objects.all(),
@@ -368,7 +372,14 @@ class SemesterForm(forms.ModelForm):
         ),
         required=True
     )
-    next_semester_begins = forms.DateTimeField()
+
+    next_semester_begins = forms.DateTimeField(
+        widget=forms.TextInput(
+            attrs={
+                'type': 'date',
+            }
+        ),
+        required=True)
     class Meta:
         model = Semester
         fields = ['semester', 'is_current_semester', 'session', 'next_semester_begins']
