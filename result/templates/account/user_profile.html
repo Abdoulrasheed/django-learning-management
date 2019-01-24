@@ -2,7 +2,7 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %} {{ user|capfirst }}'s' Profile | ARMS {% endblock title %}
+{% block title %} {{ user.first_name|capfirst }}'s Profile | ARMS {% endblock title %}
 
 {% block side_bar %}
     {% include 'partial_active_element.html' with active='Profile' %}
@@ -39,39 +39,39 @@ overflow-y: auto;
 
   <!-- Card image -->
   <div class="view overlay">
-    <img class="card-img-top" src="{{ request.user.get_picture }}" alt="User Image">
-    <a class="mask" href="{% url 'edit_profile' %}">
-      <div class="mask white-text">Change Picture</div>
+    <img class="card-img-top" src="{{ user.get_picture }}" alt="{{ user.get_fullname }}'s Picture">
+    <a class="mask" href="#">
+      <div class="mask white-text">{{ user.get_full_name|capfirst }}</div>
     </a>
   </div>
 
-{% if request.user.is_lecturer %}
+{% if user.is_lecturer %}
     <!-- Card content -->
   <div class="card-body card-body-cascade text-center">
 
-    <small class="card-title">Name: {{ request.user.get_full_name|capfirst }}</small><br>
+    <small class="card-title"><b>Name: </b>{{ user.get_full_name }}</small><br>
     <small class="card-title">Role: Lecturer </small><br>
-    <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit Profile</a>
+    <a href="#" class="btn btn-primary">Send Message</a>
   </div>
 {% endif %}
 
-{% if request.user.is_student %}
+{% if user.is_student %}
     <!-- Card content -->
   <div class="card-body card-body-cascade text-center">
 
-    <small class="card-title">Name: {{ request.user.get_full_name|capfirst }}</small><br>
+    <small class="card-title">Name: {{ user.first_name }}</small><br>
     <small class="card-title">Role: Student</small><br>
     <small class="card-title">Level: {{ level.level }}</small>
-    <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit Profile</a>
+    <a href="#" class="btn btn-primary">Send Message</a>
   </div>
 {% endif %}
 
 
-{% if request.user.is_superuser %}
+{% if user.is_superuser %}
     <!-- Card content -->
   <div class="card-body card-body-cascade text-center">
 
-    <small>Name: {{ request.user.get_full_name|capfirst }}</small><br>
+    <small>Name: {{ user.get_full_name }}</small><br>
     <small>Role: Superuser</small>
     <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit Profile</a>
   </div>
@@ -81,9 +81,9 @@ overflow-y: auto;
 </div>
 <!-- Card -->
     </div>
-    {% if request.user.is_lecturer %}
+    {% if user.is_lecturer %}
     <div class="col-md-7 text-center">
-      <p>Allocated Courses</p>
+      <p>Assigned Courses</p>
   <div class="table-wrapper-scroll-y">
 
   <table class="table table-bordered table-striped">
@@ -104,14 +104,14 @@ overflow-y: auto;
       <td>{{ course }}</td>
       <td>{{ course.courseUnit }}</td>
       <td>
-	  	  <span class="table-remove"><a href="{% url 'add_score_for' course.id %}" class="btn btn-info btn-rounded btn-sm my-0">Mark</a></span>
+	  	  <span class="table-remove"><a href="{% url 'withheld_course' pk=course.pk %}" class="btn btn-warning btn-rounded btn-sm my-0">Delete</a></span>
 	    </td>
     </tr>
     {% empty %}
     <tr>
     <td>{{ course.courseCode }}</td>
       <td></td>
-      <td>No course is assigned to you !</td>
+      <td>No course is assigned to this staff in current semester!</td>
       <td></td>
     </tr>
   {% endfor %}
@@ -120,7 +120,7 @@ overflow-y: auto;
     </div>
   </div>
   {% endif %}
-{% if request.user.is_student %}
+{% if user.is_student %}
     <div class="col-md-7 text-center">
       <p>Registered Courses</p>
   <div class="table-wrapper-scroll-y">
@@ -155,7 +155,7 @@ overflow-y: auto;
     </div>
   </div>
   {% endif %}
-  {% if request.user.is_superuser %}
+  {% if user.is_superuser %}
     <div class="col-md-7 text-center">
       <p>All staff list</p>
   <div class="table-wrapper-scroll-y">
@@ -164,7 +164,8 @@ overflow-y: auto;
   <thead>
     <tr>
       <th scope="col">#</th>
-      <th scope="col">Name</th>
+      <th scope="col">Firstname</th>
+      <th scope="col">Lastname</th>
       <th scope="col">Address</th>
       <th scope="col">Picture</th>
       <th scope="col">Action</th>
@@ -174,12 +175,13 @@ overflow-y: auto;
     {% for staff in staff %}
     <tr>
       <th scope="row">{{ forloop.counter }}</th>
-      <td>{{ staff.get_full_name|capfirst }}</td>
+      <td>{{ staff.first_name }}</td>
+      <td>{{ staff.last_name }}</td>
       <td>{{ staff.address }}</td>
       <td>{{ staff.get_picture.url }}</td>
       <td>
         <span class="table-remove">
-          <a href="{% url 'user_profile' id=staff.pk%}" class="btn btn-info btn-rounded btn-sm my-0">View</a>
+          <a href="" class="btn btn-info btn-rounded btn-sm my-0">View</a>
         </span>
 
         <span class="table-remove">
@@ -202,7 +204,12 @@ overflow-y: auto;
   {% endif %}
   <div class="col-md-2 text-center">
     <small> Registered:<br><date>{{ user.date_joined|naturaltime }}</date></small><hr />
-    <small> Last Login:<br><date>{{ user.last_login|naturaltime }}</date></small><hr />
+    <small> Last Login:<br><date>
+    {% if user.last_login == None %} 
+          Never 
+    {% else %}
+      {{ user.last_login|naturaltime }}
+    {% endif %}</date></small><hr />
     <small> Phone:<br><date>{% if user.phone %}{{ user.phone }}{% endif %}</date></small><hr />
     <small> Email:<br><date>{{ user.email }}</date></small><hr />
     <small> Address:<br><date>{{ user.address }}</date></small>

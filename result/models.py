@@ -230,7 +230,7 @@ class TakenCourse(models.Model):
 class CourseAllocation(models.Model):
     lecturer = models.ForeignKey(User, on_delete=models.CASCADE)
     courses = models.ManyToManyField(Course, related_name='allocated_course')
-    session = models.ForeignKey(Session, on_delete=models.CASCADE, blank=True)
+    session = models.ForeignKey(Session, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return self.lecturer.username

@@ -77,7 +77,7 @@
 
     <a href="{% url 'change_password' %}" class="list-group-item 
         {% if active == 'change_password' %} active {% endif %} waves-effect">
-    <i class="fa  fa-key mr-3" aria-hidden="true"></i>Update Password</a>
+    <i class="fa  fa-key mr-3" aria-hidden="true"></i>Change Password</a>
 
     {% if request.user.is_superuser %}
     <a href="{% url 'manage_session' %}" class="list-group-item 

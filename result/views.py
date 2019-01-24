@@ -55,18 +55,26 @@ def home(request):
 
 def get_chart(request, *args, **kwargs):
     all_query_score = ()
-    levels = (100, 200, 300, 400, 500)
+    levels = (100, 200, 300, 400, 500) # all the levels in the department
 
+    # iterate through the levels above
     for i in levels:
+    	# gather all the courses registered by the students of the current level in the loop
         all_query_score += (TakenCourse.objects.filter(student__level=i),)
 
+    # for level #100 
     first_level_total = 0
+
+    # get the total score for all the courses registered by the students of this level
     for i in all_query_score[0]:
         first_level_total += i.total
+    
     first_level_avg = 0
     if not all_query_score[0].count() == 0:
+    	# calculate the average of all the students of this level
         first_level_avg = first_level_total / all_query_score[0].count()
 
+    # do same  as above for # 200 Level students
     second_level_total = 0
     for i in all_query_score[1]:
         second_level_total += i.total
@@ -74,6 +82,7 @@ def get_chart(request, *args, **kwargs):
     if not all_query_score[1].count() == 0:
         second_level_avg = second_level_total / all_query_score[1].count()
 
+    # do same  as above for # 300 Level students
     third_level_total = 0
     for i in all_query_score[2]:
         third_level_total += i.total
@@ -81,6 +90,7 @@ def get_chart(request, *args, **kwargs):
     if not all_query_score[2].count() == 0:
         third_level_avg = third_level_total / all_query_score[2].count()
 
+    # do same  as above for # 400 Level students
     fourth_level_total = 0
     for i in all_query_score[3]:
         fourth_level_total += i.total
@@ -88,6 +98,7 @@ def get_chart(request, *args, **kwargs):
     if not all_query_score[3].count() == 0:
         fourth_level_avg = fourth_level_total / all_query_score[3].count()
 
+    # do same  as above for # 500 Level students
     fifth_level_total = 0
     for i in all_query_score[4]:
         fifth_level_total += i.total
@@ -122,6 +133,38 @@ def profile(request):
     else:
         staff = User.objects.filter(is_lecturer=True)
         return render(request, 'account/profile.html', { "staff": staff })
+
+@login_required
+def user_profile(request, id):
+    """ Show profile of any selected user """
+    if request.user.id == id:
+        return redirect("/profile/")
+
+    current_semester = Semester.objects.get(is_current_semester=True)
+    user = User.objects.get(pk=id)
+    if user.is_lecturer:
+        courses = Course.objects.filter(allocated_course__lecturer__pk=id).filter(semester=current_semester)
+        context = {
+            "user": user,
+            "courses": courses,
+            }
+        return render(request, 'account/user_profile.html', context)
+    elif user.is_student:
+        level = Student.objects.get(user__pk=id)
+        courses = TakenCourse.objects.filter(student__user__id=id, course__level=level.level)
+        context = {
+            "user_type": "student",
+            'courses': courses,
+            'level': level,
+            'user':user,
+        }
+        return render(request, 'account/user_profile.html', context)
+    else:
+        context = {
+            "user": user,
+            "user_type": "superuser"
+            }
+        return render(request, 'account/user_profile.html', context)
 
 @login_required
 def profile_update(request):

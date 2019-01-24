@@ -6,6 +6,7 @@ urlpatterns = [
 	path('score/', views.add_score, name='add_score'),
 	path('score/<int:id>/', views.add_score_for, name='add_score_for'),
 	path('profile/', views.profile, name='profile'),
+	path('profile/view/<int:id>/', views.user_profile, name='user_profile'),
 	path('profile/edit/', views.profile_update, name='edit_profile'),
 	path('staff/', views.staff_list, name="staff_list"),
 	path('staff/add/new/', views.StaffAddView.as_view(), name="add_new_staff"),
